@@ -1,6 +1,6 @@
 ﻿{
     "schema":  "wazuh-enterprise-rule-validation/v1",
-    "generated_at":  "2026-06-02T11:07:21.0259619+02:00",
+    "generated_at":  "2026-06-02T13:53:30.6552910+02:00",
     "source_rules":  "C:\\Users\\rfk\\Documents\\Reguły Wazuh\\wazuh\\enterprise_rules.xml",
     "safety_model":  "Endpoint scripts generate benign process/script-block telemetry with unique markers. Server-only entries must be checked against native integrations or Wazuh alerts.",
     "rules":  [
@@ -79,7 +79,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -116,7 +116,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -153,7 +153,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -233,7 +233,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -536,7 +536,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -681,7 +681,7 @@
                                  ],
                       "endpoint_method":  "correlation",
                       "trigger_text":  null,
-                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "notes":  "Correlation rule; the runner triggers child rules from the same group when endpoint-safe triggers are available.",
                       "correlation_children":  [
                                                    "100645",
                                                    "100646",
@@ -763,7 +763,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -797,7 +797,7 @@
                                  ],
                       "endpoint_method":  "correlation",
                       "trigger_text":  null,
-                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "notes":  "Correlation rule; the runner triggers child rules from the same group when endpoint-safe triggers are available.",
                       "correlation_children":  [
                                                    "100660"
                                                ]
@@ -839,7 +839,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -915,7 +915,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -948,7 +948,7 @@
                                  ],
                       "endpoint_method":  "correlation",
                       "trigger_text":  null,
-                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "notes":  "Correlation rule; the runner triggers child rules from the same group when endpoint-safe triggers are available.",
                       "correlation_children":  [
 
                                                ]
@@ -990,7 +990,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -1075,7 +1075,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -1154,7 +1154,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -1228,7 +1228,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -1461,7 +1461,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -1494,7 +1494,7 @@
                                  ],
                       "endpoint_method":  "correlation",
                       "trigger_text":  null,
-                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "notes":  "Correlation rule; the runner triggers child rules from the same group when endpoint-safe triggers are available.",
                       "correlation_children":  [
 
                                                ]
@@ -1685,7 +1685,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -1722,7 +1722,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -1801,7 +1801,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -1834,7 +1834,7 @@
                                  ],
                       "endpoint_method":  "correlation",
                       "trigger_text":  null,
-                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "notes":  "Correlation rule; the runner triggers child rules from the same group when endpoint-safe triggers are available.",
                       "correlation_children":  [
                                                    "100766"
                                                ]
@@ -1876,7 +1876,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -1918,7 +1918,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -1960,7 +1960,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -1998,7 +1998,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2036,7 +2036,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2074,7 +2074,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2112,7 +2112,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2150,7 +2150,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2187,7 +2187,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2225,7 +2225,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2262,7 +2262,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2300,7 +2300,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2338,7 +2338,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2376,7 +2376,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2412,7 +2412,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2449,7 +2449,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2527,7 +2527,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2602,7 +2602,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2638,7 +2638,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2672,7 +2672,7 @@
                                  ],
                       "endpoint_method":  "correlation",
                       "trigger_text":  null,
-                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "notes":  "Correlation rule; the runner triggers child rules from the same group when endpoint-safe triggers are available.",
                       "correlation_children":  [
 
                                                ]
@@ -2710,7 +2710,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -2743,7 +2743,7 @@
                                  ],
                       "endpoint_method":  "correlation",
                       "trigger_text":  null,
-                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "notes":  "Correlation rule; the runner triggers child rules from the same group when endpoint-safe triggers are available.",
                       "correlation_children":  [
 
                                                ]
@@ -2896,7 +2896,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -3010,7 +3010,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -3083,7 +3083,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -3158,7 +3158,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -3238,7 +3238,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -3276,7 +3276,7 @@
                                  ],
                       "endpoint_method":  "server_alert_check",
                       "trigger_text":  null,
-                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "notes":  "Requires a real log source or server-side validation on the Wazuh manager.",
                       "correlation_children":  [
 
                                                ]
@@ -3346,7 +3346,7 @@
                                  ],
                       "endpoint_method":  "correlation",
                       "trigger_text":  null,
-                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "notes":  "Correlation rule; the runner triggers child rules from the same group when endpoint-safe triggers are available.",
                       "correlation_children":  [
                                                    "100600",
                                                    "100604"
@@ -3381,7 +3381,7 @@
                                  ],
                       "endpoint_method":  "correlation",
                       "trigger_text":  null,
-                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "notes":  "Correlation rule; the runner triggers child rules from the same group when endpoint-safe triggers are available.",
                       "correlation_children":  [
                                                    "100660"
                                                ]
@@ -3413,7 +3413,7 @@
                                  ],
                       "endpoint_method":  "correlation",
                       "trigger_text":  null,
-                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "notes":  "Correlation rule; the runner triggers child rules from the same group when endpoint-safe triggers are available.",
                       "correlation_children":  [
                                                    "100676"
                                                ]
@@ -3445,7 +3445,7 @@
                                  ],
                       "endpoint_method":  "correlation",
                       "trigger_text":  null,
-                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "notes":  "Correlation rule; the runner triggers child rules from the same group when endpoint-safe triggers are available.",
                       "correlation_children":  [
                                                    "100735",
                                                    "100736",
@@ -3483,7 +3483,7 @@
                                  ],
                       "endpoint_method":  "correlation",
                       "trigger_text":  null,
-                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "notes":  "Correlation rule; the runner triggers child rules from the same group when endpoint-safe triggers are available.",
                       "correlation_children":  [
                                                    "100750",
                                                    "100751",

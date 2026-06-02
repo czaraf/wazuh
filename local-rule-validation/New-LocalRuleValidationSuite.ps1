@@ -92,7 +92,7 @@ foreach ($rule in $xml.group.rule) {
     $id = [string]$rule.id
     $method = 'server_alert_check'
     $trigger = $null
-    $notes = 'Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.'
+    $notes = 'Requires a real log source or server-side validation on the Wazuh manager.'
 
     if ($safeCommandLineTriggers.ContainsKey($id)) {
         $method = 'windows_sysmon_commandline'
@@ -106,7 +106,7 @@ foreach ($rule in $xml.group.rule) {
     }
     elseif ($rule.if_matched_sid -or $rule.if_matched_group) {
         $method = 'correlation'
-        $notes = 'Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.'
+        $notes = 'Correlation rule; the runner triggers child rules from the same group when endpoint-safe triggers are available.'
     }
 
     $rawRules += [ordered]@{

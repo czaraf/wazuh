@@ -1,18 +1,18 @@
 # Walidacja `enterprise_rules.xml`
 
-Ten katalog zawiera zestaw skryptow do kontrolowanego testowania reguł z `wazuh/enterprise_rules.xml`.
+Ten katalog zawiera zestaw skryptów do kontrolowanego testowania reguł z `wazuh/enterprise_rules.xml`.
 
 ## Model testu
 
-Skrypty endpointowe PowerShell generuja unikalny `RunId` i dla reguł opartych o `win.eventdata.commandLine` uruchamiaja bezpieczny proces `powershell.exe`, ktory tylko wypisuje marker z dopasowanym ciagiem. Dzięki temu Sysmon powinien zapisac podejrzany command line, ale endpoint nie wykonuje operacji typu czyszczenie logow, modyfikacja rejestru, usuwanie shadow copies ani instalacja uslug.
+Skrypty endpointowe PowerShell generują unikalny `RunId` i dla reguł opartych o `win.eventdata.commandLine` uruchamiają bezpieczny proces `powershell.exe`, który tylko wypisuje marker z dopasowanym ciągiem. Dzięki temu Sysmon powinien zapisać podejrzany command line, ale endpoint nie wykonuje operacji typu czyszczenie logów, modyfikacja rejestru, usuwanie shadow copies ani instalacja usług.
 
-Reguly oparte o DNS, web, Office 365, Linux, FIM, Security Event ID albo korelacje bez bezpiecznego dziecka sa oznaczane jako wymagajace realnego zrodla logow lub walidacji po stronie managera.
+Reguły oparte o DNS, web, Office 365, Linux, FIM, Security Event ID albo korelacje bez bezpiecznego dziecka są oznaczane jako wymagające realnego źródła logów lub walidacji po stronie managera.
 
 ## Przygotowanie
 
-Na maszynach Windows testy command-line wymagaja:
+Na maszynach Windows testy command-line wymagają:
 
-- zainstalowanego Sysmon,
+- zainstalowanego Sysmona,
 - zbierania `Microsoft-Windows-Sysmon/Operational` przez agenta Wazuh,
 - załadowanego `enterprise_rules.xml` na managerze Wazuh,
 - restartu managera po zmianie reguł.
@@ -20,26 +20,26 @@ Na maszynach Windows testy command-line wymagaja:
 Wygeneruj manifest i wrappery po zmianie XML-a:
 
 ```powershell
-cd C:\Users\rfk\Documents\Reguły Wazuh\wazuh\rule-validation
+cd C:\Users\rfk\Documents\Reguły Wazuh\wazuh\enterprise-rule-validation
 .\New-EnterpriseRuleValidationSuite.ps1
 ```
 
 ## Uruchomienie na endpoincie
 
-Wszystkie reguly po kolei:
+Wszystkie reguły po kolei:
 
 ```powershell
-cd C:\Users\rfk\Documents\Reguły Wazuh\wazuh\rule-validation\endpoint
+cd C:\Users\rfk\Documents\Reguły Wazuh\wazuh\enterprise-rule-validation\endpoint
 .\Invoke-AllEnterpriseRuleTests.ps1
 ```
 
-Pojedyncza regula:
+Pojedyncza reguła:
 
 ```powershell
 .\rules\Invoke-Rule100750.ps1
 ```
 
-Wyniki endpointu trafia do:
+Wyniki endpointu trafią do:
 
 - `endpoint\output\endpoint-summary.json`
 - `endpoint\output\endpoint-results.jsonl`

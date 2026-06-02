@@ -1,18 +1,18 @@
 # Walidacja `local_rules.xml`
 
-Ten katalog zawiera oddzielny zestaw skryptow do kontrolowanego testowania reguł z `wazuh/local_rules.xml`.
+Ten katalog zawiera oddzielny zestaw skryptów do kontrolowanego testowania reguł z `wazuh/local_rules.xml`.
 
 ## Model testu
 
-Skrypty endpointowe PowerShell generuja unikalny `RunId`. Dla reguł opartych o `win.eventdata.commandLine` uruchamiaja bezpieczny proces `powershell.exe`, ktory tylko wypisuje marker z dopasowanym ciagiem. Sysmon powinien zapisac podejrzany command line, ale endpoint nie wykonuje operacji typu czyszczenie logow, modyfikacja rejestru, usuwanie backupow ani uruchamianie narzedzi ofensywnych.
+Skrypty endpointowe PowerShell generują unikalny `RunId`. Dla reguł opartych o `win.eventdata.commandLine` uruchamiają bezpieczny proces `powershell.exe`, który tylko wypisuje marker z dopasowanym ciągiem. Sysmon powinien zapisać podejrzany command line, ale endpoint nie wykonuje operacji typu czyszczenie logów, modyfikacja rejestru, usuwanie backupów ani uruchamianie narzędzi ofensywnych.
 
-Reguly oparte o Windows Security Event ID, USB/PNP albo realna instalacje uslugi sa oznaczane jako wymagajace natywnego zrodla logow lub osobnego testu kontrolowanego.
+Reguły oparte o Windows Security Event ID, USB/PNP albo realną instalację usługi są oznaczane jako wymagające natywnego źródła logów lub osobnego testu kontrolowanego.
 
 ## Przygotowanie
 
-Na maszynach Windows testy command-line wymagaja:
+Na maszynach Windows testy command-line wymagają:
 
-- zainstalowanego Sysmon,
+- zainstalowanego Sysmona,
 - zbierania `Microsoft-Windows-Sysmon/Operational` przez agenta Wazuh,
 - załadowanego `local_rules.xml` na managerze Wazuh,
 - restartu managera po zmianie reguł.
@@ -26,20 +26,20 @@ cd C:\Users\rfk\Documents\Reguły Wazuh\wazuh\local-rule-validation
 
 ## Uruchomienie na endpoincie
 
-Wszystkie reguly po kolei:
+Wszystkie reguły po kolei:
 
 ```powershell
 cd C:\Users\rfk\Documents\Reguły Wazuh\wazuh\local-rule-validation\endpoint
 .\Invoke-AllLocalRuleTests.ps1
 ```
 
-Pojedyncza regula:
+Pojedyncza reguła:
 
 ```powershell
 .\rules\Invoke-Rule100750.ps1
 ```
 
-Wyniki endpointu trafia do:
+Wyniki endpointu trafią do:
 
 - `endpoint\output\endpoint-summary.json`
 - `endpoint\output\endpoint-results.jsonl`
