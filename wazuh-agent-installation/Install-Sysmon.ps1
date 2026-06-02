@@ -193,17 +193,35 @@ function Test-SysmonService {
 function Invoke-Sysmon {
     param([string[]]$Arguments)
 
-    $output = & $SYSMON_EXE @Arguments 2>&1
-    $exitCode = $LASTEXITCODE
+    $stdoutPath = Join-Path $env:TEMP ("sysmon-stdout-{0}.log" -f ([guid]::NewGuid()))
+    $stderrPath = Join-Path $env:TEMP ("sysmon-stderr-{0}.log" -f ([guid]::NewGuid()))
 
-    if ($output) {
-        foreach ($line in $output) {
-            Write-Host "    $line"
+    try {
+        $proc = Start-Process -FilePath $SYSMON_EXE `
+            -ArgumentList $Arguments `
+            -RedirectStandardOutput $stdoutPath `
+            -RedirectStandardError $stderrPath `
+            -Wait `
+            -PassThru
+
+        foreach ($path in @($stdoutPath, $stderrPath)) {
+            if ((Test-Path -LiteralPath $path) -and (Get-Item -LiteralPath $path).Length -gt 0) {
+                foreach ($line in Get-Content -LiteralPath $path) {
+                    Write-Host "    $line"
+                }
+            }
+        }
+
+        if ($proc.ExitCode -ne 0) {
+            throw "Sysmon64.exe zakonczyl dzialanie bledem. Kod: $($proc.ExitCode). Argumenty: $($Arguments -join ' ')"
         }
     }
-
-    if ($exitCode -ne 0) {
-        throw "Sysmon64.exe zakonczyl dzialanie bledem. Kod: $exitCode. Argumenty: $($Arguments -join ' ')"
+    finally {
+        foreach ($path in @($stdoutPath, $stderrPath)) {
+            if (Test-Path -LiteralPath $path) {
+                Remove-Item -LiteralPath $path -Force
+            }
+        }
     }
 }
 
