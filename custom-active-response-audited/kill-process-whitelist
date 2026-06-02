@@ -1,0 +1,16 @@
+# Nazwy procesow, ktorych kill-process.ps1 nie powinien zamykac.
+# Jedna nazwa na linie, bez rozszerzenia .exe. Linie puste i # sa ignorowane.
+powershell
+pwsh
+cmd
+explorer
+services
+svchost
+wmiprvse
+mmc
+lsass
+csrss
+wininit
+winlogon
+spoolsv
+WazuhSvc
