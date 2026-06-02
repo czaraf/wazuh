@@ -14,6 +14,18 @@ oraz robia backup `ossec.conf` przed modyfikacja.
 
 ## Szybkie uruchomienie
 
+Graficzny launcher:
+
+```powershell
+.\WazuhEndpointInstaller.exe
+```
+
+Launcher uruchamia skrypty w kolejnosci: najpierw Wazuh Agent, potem Sysmon.
+Adres managera Wazuh mozna wpisac w oknie. Oba checkboxy sa domyslnie
+zaznaczone.
+
+Uruchomienie skryptow recznie:
+
 ```powershell
 powershell.exe -ExecutionPolicy Bypass -File .\Install-WazuhAgent.ps1
 powershell.exe -ExecutionPolicy Bypass -File .\Install-Sysmon.ps1
