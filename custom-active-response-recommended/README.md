@@ -90,3 +90,15 @@ Przyklady reakcji:
 - `yara-scan` sam nie usuwa pliku, chyba ze uruchomisz skrypt recznie z `-QuarantineOnMatch` albo dopiszesz ten argument w wrapperze.
 - `collect-forensics` nie izoluje hosta i nie zmienia konfiguracji systemu.
 - `disable-ad-account` ignoruje konta z allowlisty, konta maszynowe i nazwy pasujace do wzorca kont chronionych/uslugowych.
+
+## Utrzymanie przy zmianie regulek
+
+Te skrypty sa zalezne od ID regulek oraz pol JSON w alertach Wazuh. Po zmianie
+`local_rules.xml` albo `enterprise_rules.xml` sprawdz:
+
+- czy `ossec.conf` nadal mapuje reakcje na wlasciwe `rules_id`,
+- czy dana reakcja nie jest zbyt ostra dla nowego triggera,
+- czy pola czytane przez skrypty nadal istnieja w `parameters.alert`,
+- czy `TargetPath`, `UserName`, `ProcessId` albo inne dane nie zmienily nazwy/sciezki.
+
+Repo-lokalna notatka dla Codex jest w `.codex/WAZUH_ACTIVE_RESPONSE_NOTES.md`.
