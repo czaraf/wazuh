@@ -1,0 +1,18 @@
+| Reguła | Co oznacza                                      | Active response |
+| ------ | ----------------------------------------------- | --------------- |
+| 100856 | 10 nieudanych logowań z jednego IP w 60 s       | netsh-drop      |
+| 100900 | wiele technik initial access z jednego źródła   | isolate-host    |
+| 100901 | DCSync po użyciu poświadczeń                    | isolate-host    |
+| 100902 | kilka wskaźników Kerberoasting z jednego źródła | isolate-host    |
+| 100903 | Pass-the-Hash / Pass-the-Ticket                 | isolate-host    |
+| 100904 | potwierdzone aktywne C2                         | isolate-host    |
+| 100750 | Cobalt Strike indicator                         | isolate-host    |
+| 100751 | Sliver/Havoc/BRC4 indicator                     | isolate-host    |
+
+
+To przypisanie jest rozsądne, bo 100856 to typowy trigger do blokady źródłowego IP, 
+a reguły 100900-100904, 100750, 100751 sugerują już realny incydent, więc lepiej 
+odciąć cały endpoint niż tylko IP atakującego.
+
+
+

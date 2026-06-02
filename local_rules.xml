@@ -1,0 +1,320 @@
+<!--
+  Wazuh - Enterprise Security Rules (ESENCJA)
+  Wersja: 1.0-essentials (filtr keep/defer/drop)
+  Pochodzi z: enterprise_rules.xml v1.0 (67 reguł)
+  Tu jest: 28 reguł (27 esencji + 1 dodana: USB / removable media)
+  Odlozono na fazę 2: 33 reguły (czekają na Sysmon-tuning, FIM, O365, DNS, Linux)
+  Wyrzucono: 7 reguł generujących nieuzasadniony szum
+  ID Range: 100600-100919 (zachowane oryginalne dla łatwej migracji)
+
+  DODANE:
+    - 100890 (USB / nośnik zewnętrzny) - wymaga Audit PNP Activity na agencie
+
+  WYMAGANIE FAZY 0: Sysmon zainstalowany na agentach Windows.
+  20 z 27 reguł zależy od `if_sid 67027` (Wazuh Sysmon decoder).
+  Bez Sysmona aktywnie działa tylko: 100855, 100856, 100872 + korelacje 100900-100904.
+
+  Rekomendowany config Sysmon:
+    - https://github.com/olafhartong/sysmon-modular   (modular, łatwy do tuningu)
+    - https://github.com/SwiftOnSecurity/sysmon-config (sprawdzony klasyk)
+-->
+<group name="enterprise,security,attack">
+
+  <!-- ============================================================
+       INITIAL ACCESS - macro detonation
+       ============================================================ -->
+
+  <rule id="100601" level="14">
+    <if_sid>60009</if_sid>
+    <field name="win.eventdata.parentProcessName" type="pcre2">(?i)(winword|excel|powerpnt|onenote)\.exe$</field>
+    <field name="win.eventdata.processName" type="pcre2">(?i)(cmd|powershell|wscript|cscript|mshta|regsvr32|rundll32)\.exe$</field>
+    <description>INITIAL ACCESS [T1566.001]: Malicious macro - Office spawned shell process</description>
+    <mitre><id>T1566.001</id></mitre>
+    <group>enterprise,initial_access,critical</group>
+  </rule>
+
+  <rule id="100604" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(mshta\.exe\s+https?:|mshta.*vbscript:|mshta.*javascript:)</field>
+    <description>INITIAL ACCESS [T1189]: MSHTA remote script execution (living-off-the-land)</description>
+    <mitre><id>T1189</id></mitre>
+    <group>enterprise,initial_access,lolbas</group>
+  </rule>
+
+  <!-- ============================================================
+       AMSI BYPASS - dedicated attack patterns
+       ============================================================ -->
+
+  <rule id="100615" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(amsi\.dll|AmsiScanBuffer|AmsiInitFailed|amsiContext)</field>
+    <description>DEFENSE EVASION [T1562.001]: AMSI bypass attempt detected in command line</description>
+    <mitre><id>T1562.001</id></mitre>
+    <group>enterprise,defense_evasion,amsi_bypass</group>
+  </rule>
+
+  <rule id="100616" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)\[Ref\]\.Assembly\.GetType.*System\.Management\.Automation.*NonPublic</field>
+    <description>DEFENSE EVASION [T1562.001]: PowerShell reflection AMSI bypass</description>
+    <mitre><id>T1562.001</id></mitre>
+    <group>enterprise,defense_evasion,amsi_bypass,critical</group>
+  </rule>
+
+  <!-- ============================================================
+       UAC BYPASS - tool signatures
+       ============================================================ -->
+
+  <rule id="100647" level="12">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)bypassuac|UACMe|akagi|elevate.*token</field>
+    <description>PRIVILEGE ESCALATION [T1548.002]: Known UAC bypass tool signature</description>
+    <mitre><id>T1548.002</id></mitre>
+    <group>enterprise,privilege_escalation,uac_bypass</group>
+  </rule>
+
+  <!-- ============================================================
+       DCSYNC - the smoking gun
+       ============================================================ -->
+
+  <rule id="100660" level="15">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(lsadump::dcsync|mimikatz.*dcsync|invoke-dcsync|DRSGetNCChanges)</field>
+    <description>CREDENTIAL ACCESS [T1003.006]: DCSync attack detected - AD credential replication</description>
+    <mitre><id>T1003.006</id></mitre>
+    <group>enterprise,credential_access,dcsync,critical</group>
+  </rule>
+
+  <!-- ============================================================
+       KERBEROASTING / AS-REP - dedicated tools
+       ============================================================ -->
+
+  <rule id="100676" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(invoke-kerberoast|rubeus.*kerberoast|GetUserSPNs|impacket.*GetUserSPNs)</field>
+    <description>CREDENTIAL ACCESS [T1558.003]: Kerberoasting tool execution detected</description>
+    <mitre><id>T1558.003</id></mitre>
+    <group>enterprise,credential_access,kerberoasting,critical</group>
+  </rule>
+
+  <rule id="100691" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(invoke-asreproast|rubeus.*asreproast|GetNPUsers|impacket.*GetNPUsers)</field>
+    <description>CREDENTIAL ACCESS [T1558.004]: AS-REP Roasting tool detected</description>
+    <mitre><id>T1558.004</id></mitre>
+    <group>enterprise,credential_access,asrep_roasting,critical</group>
+  </rule>
+
+  <!-- ============================================================
+       ADCS / LOLBAS
+       ============================================================ -->
+
+  <rule id="100705" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(certify|certipy|pkiview|certutil.*-ca\b|adcs.*vuln)</field>
+    <description>CREDENTIAL ACCESS [T1649]: ADCS abuse tool detected (Certify/Certipy)</description>
+    <mitre><id>T1649</id></mitre>
+    <group>enterprise,credential_access,adcs_abuse</group>
+  </rule>
+
+  <rule id="100707" level="12">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)certutil.*(encode|decode|-urlcache|-f\s+http)</field>
+    <description>DEFENSE EVASION [T1140]: CertUtil used for encode/decode or download</description>
+    <mitre><id>T1140</id></mitre>
+    <group>enterprise,defense_evasion,lolbas</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOODHOUND / AD ENUM
+       ============================================================ -->
+
+  <rule id="100720" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(SharpHound|bloodhound|invoke-bloodhound|AzureHound|ADCollector)</field>
+    <description>DISCOVERY [T1069.002]: BloodHound/AD enumeration tool detected</description>
+    <mitre><id>T1069.002</id></mitre>
+    <group>enterprise,discovery,bloodhound</group>
+  </rule>
+
+  <!-- ============================================================
+       PASS-THE-HASH / PASS-THE-TICKET
+       ============================================================ -->
+
+  <rule id="100735" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(sekurlsa::pth|invoke-pth|pass.*hash|pth-winexe|crackmapexec.*-H\s+[a-f0-9]{32})</field>
+    <description>LATERAL MOVEMENT [T1550.002]: Pass-the-Hash attack detected</description>
+    <mitre><id>T1550.002</id></mitre>
+    <group>enterprise,lateral_movement,pth,critical</group>
+  </rule>
+
+  <rule id="100736" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(rubeus.*ptt|kerberos::ptt|invoke-ptt|mimikatz.*ticket)</field>
+    <description>LATERAL MOVEMENT [T1550.003]: Pass-the-Ticket detected</description>
+    <mitre><id>T1550.003</id></mitre>
+    <group>enterprise,lateral_movement,ptt,critical</group>
+  </rule>
+
+  <!-- ============================================================
+       C2 FRAMEWORKS - signature-based
+       ============================================================ -->
+
+  <rule id="100750" level="15">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(cobaltstrike|cobalt\s+strike|beacon\.exe|cs\.jar|teamserver)</field>
+    <description>C2 [T1071]: Cobalt Strike indicator in command line</description>
+    <mitre><id>T1071</id></mitre>
+    <group>enterprise,c2,cobaltstrike,critical</group>
+  </rule>
+
+  <rule id="100751" level="15">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(sliver|havoc\s+framework|brute\s+ratel|nighthawk\.exe|deimos\.exe)</field>
+    <description>C2 [T1071]: Modern C2 framework indicator (Sliver/Havoc/BRC4)</description>
+    <mitre><id>T1071</id></mitre>
+    <group>enterprise,c2,critical</group>
+  </rule>
+
+  <rule id="100752" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(meterpreter|metasploit|msf.*handler|multi\/handler)</field>
+    <description>C2 [T1071]: Metasploit/Meterpreter indicator detected</description>
+    <mitre><id>T1071</id></mitre>
+    <group>enterprise,c2</group>
+  </rule>
+
+  <rule id="100753" level="12">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(rundll32.*http|regsvr32.*http|regasm.*http|installutil.*http)</field>
+    <description>C2 [T1105]: LOLBAS used to download payload (potential C2 stager)</description>
+    <mitre><id>T1105</id></mitre>
+    <group>enterprise,c2,lolbas</group>
+  </rule>
+
+  <!-- ============================================================
+       DNS TUNNELING - dedicated tools
+       ============================================================ -->
+
+  <rule id="100766" level="12">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(iodine|dnscat|dns2tcp|dns\s+tunnel|dnstunnel)</field>
+    <description>C2 [T1071.004]: Known DNS tunneling tool detected</description>
+    <mitre><id>T1071.004</id></mitre>
+    <group>enterprise,c2,dns_tunnel</group>
+  </rule>
+
+  <!-- ============================================================
+       BRUTE FORCE (działa BEZ Sysmona - Windows Security log)
+       UWAGA: zastępuje proponowane wcześniej 100200/100201 (RDP-only)
+       ============================================================ -->
+
+  <rule id="100855" level="13">
+    <if_sid>60009</if_sid>
+    <field name="win.system.eventID" type="pcre2">^4625$</field>
+    <options>no_full_log</options>
+    <description>CREDENTIAL ACCESS [T1110]: Failed logon attempt (brute force monitor)</description>
+    <mitre><id>T1110</id></mitre>
+    <group>enterprise,credential_access,brute_force</group>
+  </rule>
+
+  <rule id="100856" level="15" frequency="10" timeframe="60">
+    <if_matched_sid>100855</if_matched_sid>
+    <same_source_ip/>
+    <description>CREDENTIAL ACCESS [T1110.001]: Brute force - 10 failed logons in 60s from same IP</description>
+    <mitre><id>T1110.001</id></mitre>
+    <group>enterprise,credential_access,brute_force,critical</group>
+  </rule>
+
+  <!-- ============================================================
+       CREDENTIAL DUMPING TOOLS
+       ============================================================ -->
+
+  <rule id="100857" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(lazagne|credentialfileview|dumpCredStore|vault.*dump|keethief)</field>
+    <description>CREDENTIAL ACCESS [T1555]: Password manager / credential store dumping</description>
+    <mitre><id>T1555</id></mitre>
+    <group>enterprise,credential_access</group>
+  </rule>
+
+  <!-- ============================================================
+       SUSPICIOUS SERVICE INSTALL (działa BEZ Sysmona - Event 7045)
+       ============================================================ -->
+
+  <rule id="100872" level="13">
+    <if_sid>60009</if_sid>
+    <field name="win.system.eventID" type="pcre2">^7045$</field>
+    <field name="win.eventdata.serviceFileName" type="pcre2">(?i)(\\temp\\|\\public\\|cmd\.exe|powershell)</field>
+    <description>LATERAL MOVEMENT [T1570]: Suspicious service installed from temp/public path</description>
+    <mitre><id>T1570</id></mitre>
+    <group>enterprise,lateral_movement,persistence</group>
+  </rule>
+
+  <!-- ============================================================
+       USB / REMOVABLE MEDIA (działa BEZ Sysmona - Windows Security log)
+       Wymaga: "Audit PNP Activity" > Success w polityce audytu Windows.
+       Włączenie (PowerShell admin, jednorazowo na agencie):
+         auditpol /set /subcategory:"Plug and Play Events" /success:enable
+       Albo GPO: Computer Config > Windows Settings > Security Settings >
+                 Advanced Audit Policy > Detailed Tracking > Audit PNP Activity
+       Bez tej polityki Event 6416 się nie pojawi - reguła będzie martwa.
+       ============================================================ -->
+
+  <rule id="100890" level="6">
+    <if_sid>60009</if_sid>
+    <field name="win.system.eventID" type="pcre2">^6416$</field>
+    <field name="win.eventdata.classId" type="pcre2">(?i)4d36e967-e325-11ce-bfc1-08002be10318</field>
+    <description>USB / nośnik zewnętrzny podpięty: $(win.eventdata.deviceDescription)</description>
+    <mitre><id>T1091</id></mitre>
+    <mitre><id>T1052.001</id></mitre>
+    <group>enterprise,usb,removable_media,rodo</group>
+  </rule>
+
+  <!-- ============================================================
+       KILL CHAIN CORRELATIONS - reduktory szumu (zero kosztu)
+       Odpalą się tylko gdy podregułki z grupy złapią coś w 10 min.
+       ============================================================ -->
+
+  <rule id="100900" level="15" frequency="2" timeframe="600">
+    <if_matched_group>initial_access</if_matched_group>
+    <same_source_ip/>
+    <description>KILL CHAIN [TA0001]: Multiple initial access techniques from same source</description>
+    <mitre><id>TA0001</id></mitre>
+    <group>enterprise,kill_chain,critical</group>
+  </rule>
+
+  <rule id="100901" level="15" frequency="2" timeframe="600">
+    <if_matched_group>dcsync</if_matched_group>
+    <same_source_ip/>
+    <description>KILL CHAIN [T1003.006+T1550]: DCSync followed by credential use - APT confirmed</description>
+    <mitre><id>T1003.006</id></mitre>
+    <group>enterprise,kill_chain,apt,critical</group>
+  </rule>
+
+  <rule id="100902" level="15" frequency="2" timeframe="600">
+    <if_matched_group>kerberoasting</if_matched_group>
+    <same_source_ip/>
+    <description>KILL CHAIN [T1558.003]: Multiple Kerberoasting indicators from same source</description>
+    <mitre><id>T1558.003</id></mitre>
+    <group>enterprise,kill_chain,critical</group>
+  </rule>
+
+  <rule id="100903" level="15" frequency="2" timeframe="600">
+    <if_matched_group>lateral_movement</if_matched_group>
+    <same_source_ip/>
+    <description>KILL CHAIN [T1550]: Pass-the-Hash AND Pass-the-Ticket - full credential abuse</description>
+    <mitre><id>T1550</id></mitre>
+    <group>enterprise,kill_chain,critical</group>
+  </rule>
+
+  <rule id="100904" level="15" frequency="2" timeframe="600">
+    <if_matched_group>c2</if_matched_group>
+    <same_source_ip/>
+    <description>KILL CHAIN [TA0011]: Active C2 framework confirmed - incident response required</description>
+    <mitre><id>TA0011</id></mitre>
+    <group>enterprise,kill_chain,c2,critical</group>
+  </rule>
+
+</group>
