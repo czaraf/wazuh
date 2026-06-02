@@ -1,0 +1,6 @@
+# Accounts listed here are never disabled by disable-ad-account.ps1.
+# Use one samAccountName per line. Lines starting with # are ignored.
+administrator
+krbtgt
+guest
+wazuh
