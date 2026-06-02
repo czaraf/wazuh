@@ -1,48 +1,48 @@
-﻿#Requires -RunAsAdministrator
+#Requires -RunAsAdministrator
 <#
 .SYNOPSIS
-    Idempotentna instalacja Sysmon z konfiguracją SwiftOnSecurity.
+    Idempotentna instalacja Sysmon z konfiguracja SwiftOnSecurity.
 .DESCRIPTION
-    Skrypt mozna uruchomic wielokrotnie (desired-state):
-      - katalog C:\Sysmon       -> tworzony tylko jesli nie istnieje
-      - Sysmon.zip              -> pobierany tylko jesli brak pliku
-      - rozpakowywanie          -> pomijane jesli Sysmon64.exe juz jest
-      - sysmonconfig.xml        -> pobierany tylko jesli brak pliku
-      - instalacja uslugi       -> pomijana jesli Sysmon64 juz zainstalowany
-      - aktualizacja konfigu    -> wykonywana jesli wersja configu jest starsza
-      - wpis w ossec.conf       -> dodawany tylko jesli jeszcze nie istnieje
-      - restart WazuhSvc        -> wykonywany tylko po zmianie ossec.conf
+    Skrypt instaluje lub aktualizuje Sysmon, zabezpiecza katalog instalacyjny,
+    weryfikuje podpis Sysmon64.exe, opcjonalnie sprawdza hashe pobranych plikow
+    i dodaje kanal Sysmon do ossec.conf agenta Wazuh.
 .NOTES
     Wymaga uprawnien administratora.
-    Sysmon config : SwiftOnSecurity sysmonconfig-export.xml
-    Agent Wazuh   : musi byc zainstalowany w C:\Program Files (x86)\ossec-agent
+    Wazuh Agent powinien byc zainstalowany przed uruchomieniem tego skryptu.
 #>
+
+[CmdletBinding()]
+param(
+    [ValidateNotNullOrEmpty()]
+    [string]$SysmonDir = "C:\Sysmon",
+
+    [ValidateNotNullOrEmpty()]
+    [string]$SysmonZipUrl = "https://download.sysinternals.com/files/Sysmon.zip",
+
+    [ValidateNotNullOrEmpty()]
+    [string]$SysmonConfigUrl = "https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-config/master/sysmonconfig-export.xml",
+
+    [string]$ExpectedSysmonZipSha256 = "",
+    [string]$ExpectedConfigSha256 = "",
+
+    [ValidateNotNullOrEmpty()]
+    [string]$WazuhAgentDir = "${env:ProgramFiles(x86)}\ossec-agent",
+
+    [switch]$KeepDownloads,
+    [switch]$SkipSignatureCheck
+)
 
 $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-# ------------------------------------------------------------------ Konfiguracja
-$SYSMON_DIR     = "C:\Sysmon"
-$SYSMON_ZIP     = "$SYSMON_DIR\Sysmon.zip"
-$SYSMON_EXE     = "$SYSMON_DIR\Sysmon64.exe"
-$SYSMON_CFG     = "$SYSMON_DIR\sysmonconfig.xml"
-$SYSMON_SVC     = "Sysmon64"
-$ZIP_URL        = "https://download.sysinternals.com/files/Sysmon.zip"
-$CFG_URL        = "https://raw.githubusercontent.com/SwiftOnSecurity/sysmon-config/master/sysmonconfig-export.xml"
+$SYSMON_ZIP = Join-Path $SysmonDir "Sysmon.zip"
+$SYSMON_EXE = Join-Path $SysmonDir "Sysmon64.exe"
+$SYSMON_CFG = Join-Path $SysmonDir "sysmonconfig.xml"
+$SYSMON_SVC = "Sysmon64"
+$OSSEC_CONF = Join-Path $WazuhAgentDir "ossec.conf"
+$WAZUH_SVC = "WazuhSvc"
+$SYSMON_EVENTCHANNEL = "Microsoft-Windows-Sysmon/Operational"
 
-$OSSEC_CONF     = "C:\Program Files (x86)\ossec-agent\ossec.conf"
-$WAZUH_SVC      = "WazuhSvc"
-
-# Blok localfile do dodania do ossec.conf
-$LOCALFILE_BLOCK = @"
-
-  <localfile>
-    <location>Microsoft-Windows-Sysmon/Operational</location>
-    <log_format>eventchannel</log_format>
-  </localfile>
-"@
-
-# ------------------------------------------------------------------ Pomocniki
 function Write-Done {
     param([string]$Message)
     Write-Host "[" -NoNewline
@@ -62,172 +62,351 @@ function Write-Step {
     Write-Host "`n>>> $Message" -ForegroundColor Cyan
 }
 
+function Write-Warn {
+    param([string]$Message)
+    Write-Host "[WARN] $Message" -ForegroundColor Yellow
+}
+
+function Test-Administrator {
+    $principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+function New-DirectoryIfMissing {
+    param([string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) {
+        New-Item -ItemType Directory -Force -Path $Path | Out-Null
+        Write-Done "Katalog utworzony: $Path"
+    } else {
+        Write-Skip "Katalog juz istnieje: $Path"
+    }
+}
+
+function Set-SecureDirectoryAcl {
+    param([string]$Path)
+
+    $acl = New-Object System.Security.AccessControl.DirectorySecurity
+    $acl.SetAccessRuleProtection($true, $false)
+
+    $rights = [System.Security.AccessControl.FileSystemRights]::FullControl
+    $inheritance = [System.Security.AccessControl.InheritanceFlags]"ContainerInherit, ObjectInherit"
+    $propagation = [System.Security.AccessControl.PropagationFlags]::None
+    $allow = [System.Security.AccessControl.AccessControlType]::Allow
+
+    foreach ($sidString in @("S-1-5-18", "S-1-5-32-544")) {
+        $sid = New-Object System.Security.Principal.SecurityIdentifier($sidString)
+        $rule = New-Object System.Security.AccessControl.FileSystemAccessRule($sid, $rights, $inheritance, $propagation, $allow)
+        $acl.AddAccessRule($rule)
+    }
+
+    Set-Acl -LiteralPath $Path -AclObject $acl
+    Write-Done "ACL katalogu ograniczone do SYSTEM i Administrators."
+}
+
+function Receive-FileIfMissing {
+    param(
+        [string]$Uri,
+        [string]$Destination
+    )
+
+    if (Test-Path -LiteralPath $Destination) {
+        Write-Skip "Plik juz istnieje: $Destination - pomijam pobieranie."
+        return $false
+    }
+
+    $destinationDir = Split-Path -Parent $Destination
+    if (-not (Test-Path -LiteralPath $destinationDir)) {
+        New-Item -ItemType Directory -Force -Path $destinationDir | Out-Null
+    }
+
+    $partial = "$Destination.download"
+    if (Test-Path -LiteralPath $partial) {
+        Remove-Item -LiteralPath $partial -Force
+    }
+
+    Write-Host "    Pobieranie z: $Uri"
+    Invoke-WebRequest -Uri $Uri -OutFile $partial -UseBasicParsing
+    Move-Item -LiteralPath $partial -Destination $Destination -Force
+    Write-Done "Plik pobrany: $Destination"
+    return $true
+}
+
+function Assert-FileHashSha256 {
+    param(
+        [string]$Path,
+        [string]$ExpectedSha256,
+        [string]$Label
+    )
+
+    if ([string]::IsNullOrWhiteSpace($ExpectedSha256)) {
+        Write-Warn "Brak oczekiwanego SHA256 dla: $Label. Weryfikacja hash zostala pominieta."
+        return
+    }
+
+    $actual = (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash
+    if ($actual -ne $ExpectedSha256) {
+        throw "Nieprawidlowy SHA256 dla '$Path'. Oczekiwano $ExpectedSha256, otrzymano $actual."
+    }
+
+    Write-Done "Hash SHA256 poprawny: $Label"
+}
+
+function Assert-AuthenticodeSignature {
+    param(
+        [string]$Path,
+        [string]$ExpectedSubjectContains
+    )
+
+    if ($SkipSignatureCheck) {
+        Write-Warn "Pominieto weryfikacje podpisu Authenticode dla: $Path"
+        return
+    }
+
+    $signature = Get-AuthenticodeSignature -LiteralPath $Path
+    if ($signature.Status -ne 'Valid') {
+        throw "Podpis Authenticode dla '$Path' nie jest poprawny. Status: $($signature.Status)."
+    }
+
+    if ($ExpectedSubjectContains -and $signature.SignerCertificate.Subject -notlike "*$ExpectedSubjectContains*") {
+        throw "Podpis '$Path' jest poprawny, ale wystawca nie zawiera '$ExpectedSubjectContains'. Wystawca: $($signature.SignerCertificate.Subject)"
+    }
+
+    Write-Done "Podpis Authenticode poprawny: $($signature.SignerCertificate.Subject)"
+}
+
+function Assert-XmlFile {
+    param(
+        [string]$Path,
+        [string]$Label
+    )
+
+    $xml = New-Object System.Xml.XmlDocument
+    $xml.PreserveWhitespace = $true
+    $xml.Load($Path)
+    Write-Done "XML poprawny: $Label"
+}
+
 function Test-SysmonService {
     return $null -ne (Get-Service -Name $SYSMON_SVC -ErrorAction SilentlyContinue)
 }
 
-# ============================================================
-# KROK 1 - Sprawdzenie uprawnien administratora
-# ============================================================
+function Invoke-Sysmon {
+    param([string[]]$Arguments)
+
+    $output = & $SYSMON_EXE @Arguments 2>&1
+    $exitCode = $LASTEXITCODE
+
+    if ($output) {
+        foreach ($line in $output) {
+            Write-Host "    $line"
+        }
+    }
+
+    if ($exitCode -ne 0) {
+        throw "Sysmon64.exe zakonczyl dzialanie bledem. Kod: $exitCode. Argumenty: $($Arguments -join ' ')"
+    }
+}
+
+function Start-ServiceIfNeeded {
+    param([string]$Name)
+
+    $svc = Get-Service -Name $Name -ErrorAction SilentlyContinue
+    if (-not $svc) {
+        throw "Usluga $Name nie istnieje."
+    }
+
+    if ($svc.Status -eq 'Running') {
+        Write-Skip "Usluga $Name juz dziala (Status: $($svc.Status))."
+        return
+    }
+
+    Start-Service -Name $Name
+    $svc.WaitForStatus('Running', [TimeSpan]::FromSeconds(30))
+    Write-Done "Usluga $Name uruchomiona."
+}
+
+function New-Backup {
+    param([string]$Path)
+
+    $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+    $backupPath = "$Path.bak-$timestamp"
+    Copy-Item -LiteralPath $Path -Destination $backupPath -Force
+    Write-Done "Utworzono backup: $backupPath"
+    return $backupPath
+}
+
+function Get-OssecXml {
+    param([string]$Path)
+
+    $xml = New-Object System.Xml.XmlDocument
+    $xml.PreserveWhitespace = $true
+    $xml.Load($Path)
+    return $xml
+}
+
+function Save-XmlDocument {
+    param(
+        [System.Xml.XmlDocument]$Xml,
+        [string]$Path
+    )
+
+    $tempPath = "$Path.tmp"
+    $Xml.Save($tempPath)
+    Move-Item -LiteralPath $tempPath -Destination $Path -Force
+}
+
+function Test-SysmonLocalfileExists {
+    param([System.Xml.XmlDocument]$Xml)
+
+    $localfiles = $Xml.SelectNodes('/ossec_config/localfile')
+    foreach ($localfile in $localfiles) {
+        $location = $localfile.SelectSingleNode('location')
+        $format = $localfile.SelectSingleNode('log_format')
+        if ($location -and $format -and
+            $location.InnerText -eq $SYSMON_EVENTCHANNEL -and
+            $format.InnerText -eq 'eventchannel') {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Add-SysmonLocalfileToOssec {
+    param([string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        Write-Warn "Plik $Path nie istnieje - czy Wazuh Agent jest zainstalowany?"
+        Write-Skip "Pomijam konfiguracje Wazuh."
+        return $false
+    }
+
+    $xml = Get-OssecXml -Path $Path
+    $root = $xml.SelectSingleNode('/ossec_config')
+    if (-not $root) {
+        throw "Nie znaleziono elementu /ossec_config w $Path."
+    }
+
+    if (Test-SysmonLocalfileExists -Xml $xml) {
+        Write-Skip "Wpis Sysmon/Operational juz istnieje w ossec.conf - brak zmian."
+        return $false
+    }
+
+    New-Backup -Path $Path | Out-Null
+
+    $localfile = $xml.CreateElement('localfile')
+    $location = $xml.CreateElement('location')
+    $logFormat = $xml.CreateElement('log_format')
+
+    $location.InnerText = $SYSMON_EVENTCHANNEL
+    $logFormat.InnerText = 'eventchannel'
+
+    [void]$localfile.AppendChild($location)
+    [void]$localfile.AppendChild($logFormat)
+    [void]$root.AppendChild($localfile)
+
+    Save-XmlDocument -Xml $xml -Path $Path
+    Write-Done "Wpis Sysmon dodany do ossec.conf."
+    return $true
+}
+
+function Restart-WazuhIfNeeded {
+    param([bool]$Changed)
+
+    if (-not $Changed) {
+        Write-Skip "ossec.conf nie byl modyfikowany - pomijam restart WazuhSvc."
+        return
+    }
+
+    $wazuhSvc = Get-Service -Name $WAZUH_SVC -ErrorAction SilentlyContinue
+    if (-not $wazuhSvc) {
+        Write-Warn "Usluga $WAZUH_SVC nie istnieje - pomijam restart."
+        return
+    }
+
+    Restart-Service -Name $WAZUH_SVC -Force
+    $wazuhSvc = Get-Service -Name $WAZUH_SVC
+    $wazuhSvc.WaitForStatus('Running', [TimeSpan]::FromSeconds(30))
+    Write-Done "WazuhSvc zrestartowany pomyslnie (Status: $($wazuhSvc.Status))."
+}
+
 Write-Step "Sprawdzanie uprawnien administratora..."
-$principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
-if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Error "Skrypt musi byc uruchomiony jako Administrator."
-    exit 1
+if (-not (Test-Administrator)) {
+    throw "Skrypt musi byc uruchomiony jako Administrator."
 }
 Write-Done "Uprawnienia administratora potwierdzone."
 
-# ============================================================
-# KROK 2 - Utworzenie katalogu C:\Sysmon
-# ============================================================
-Write-Step "Sprawdzanie katalogu $SYSMON_DIR..."
-if (Test-Path $SYSMON_DIR) {
-    Write-Skip "Katalog juz istnieje: $SYSMON_DIR"
-} else {
-    New-Item -ItemType Directory -Force -Path $SYSMON_DIR | Out-Null
-    Write-Done "Katalog utworzony: $SYSMON_DIR"
-}
+Write-Step "Sprawdzanie katalogu $SysmonDir..."
+New-DirectoryIfMissing -Path $SysmonDir
+Set-SecureDirectoryAcl -Path $SysmonDir
 
-# ============================================================
-# KROK 3 - Pobranie Sysmon.zip
-# ============================================================
 Write-Step "Sprawdzanie pliku Sysmon.zip..."
-if (Test-Path $SYSMON_ZIP) {
-    Write-Skip "Plik juz istnieje: $SYSMON_ZIP - pomijam pobieranie."
-} else {
-    Write-Host "    Pobieranie z: $ZIP_URL"
-    Invoke-WebRequest -Uri $ZIP_URL -OutFile $SYSMON_ZIP -UseBasicParsing
-    Write-Done "Plik pobrany: $SYSMON_ZIP"
-}
+$downloadedZip = Receive-FileIfMissing -Uri $SysmonZipUrl -Destination $SYSMON_ZIP
+Assert-FileHashSha256 -Path $SYSMON_ZIP -ExpectedSha256 $ExpectedSysmonZipSha256 -Label "Sysmon.zip"
 
-# ============================================================
-# KROK 4 - Rozpakowanie archiwum
-# ============================================================
 Write-Step "Sprawdzanie Sysmon64.exe..."
-if (Test-Path $SYSMON_EXE) {
+if (Test-Path -LiteralPath $SYSMON_EXE) {
     Write-Skip "Sysmon64.exe juz istnieje - pomijam rozpakowywanie."
 } else {
-    Write-Host "    Rozpakowywanie $SYSMON_ZIP..."
-    Expand-Archive -Path $SYSMON_ZIP -DestinationPath $SYSMON_DIR -Force
-    Write-Done "Archiwum rozpakowane do: $SYSMON_DIR"
+    Expand-Archive -Path $SYSMON_ZIP -DestinationPath $SysmonDir -Force
+    Write-Done "Archiwum rozpakowane do: $SysmonDir"
 }
+Assert-AuthenticodeSignature -Path $SYSMON_EXE -ExpectedSubjectContains "Microsoft"
 
-# ============================================================
-# KROK 5 - Pobranie konfiguracji SwiftOnSecurity
-# ============================================================
 Write-Step "Sprawdzanie pliku konfiguracyjnego sysmonconfig.xml..."
-if (Test-Path $SYSMON_CFG) {
-    Write-Skip "sysmonconfig.xml juz istnieje - pomijam pobieranie."
-} else {
-    Write-Host "    Pobieranie konfigu SwiftOnSecurity..."
-    Invoke-WebRequest -Uri $CFG_URL -OutFile $SYSMON_CFG -UseBasicParsing
-    Write-Done "Konfiguracja pobrana: $SYSMON_CFG"
-}
+$downloadedConfig = Receive-FileIfMissing -Uri $SysmonConfigUrl -Destination $SYSMON_CFG
+Assert-FileHashSha256 -Path $SYSMON_CFG -ExpectedSha256 $ExpectedConfigSha256 -Label "sysmonconfig.xml"
+Assert-XmlFile -Path $SYSMON_CFG -Label "sysmonconfig.xml"
 
-# ============================================================
-# KROK 6 - Instalacja lub aktualizacja konfiguracji Sysmon
-# ============================================================
-Write-Step "Sprawdzanie uslugi Sysmon64..."
-$ossecChanged = $false
-
+Write-Step "Instalacja lub aktualizacja konfiguracji Sysmon..."
 if (Test-SysmonService) {
-    Write-Skip "Usluga Sysmon64 juz zainstalowana - aktualizuje konfiguracje..."
-    & $SYSMON_EXE -c $SYSMON_CFG | Out-Null
+    Write-Skip "Usluga Sysmon64 juz zainstalowana - aktualizuje konfiguracje."
+    Invoke-Sysmon -Arguments @("-c", $SYSMON_CFG)
     Write-Done "Konfiguracja Sysmon zaktualizowana (-c)."
 } else {
-    Write-Host "    Instalowanie Sysmon64 z konfigurem SwiftOnSecurity..."
-    & $SYSMON_EXE -accepteula -i $SYSMON_CFG | Out-Null
-
-    # Poczekaj az usluga wstanie
+    Write-Host "    Instalowanie Sysmon64 z konfiguracja..."
+    Invoke-Sysmon -Arguments @("-accepteula", "-i", $SYSMON_CFG)
     Start-Sleep -Seconds 3
     if (-not (Test-SysmonService)) {
-        Write-Error "Usluga Sysmon64 nie zostala zarejestrowana po instalacji."
-        exit 1
+        throw "Usluga Sysmon64 nie zostala zarejestrowana po instalacji."
     }
     Write-Done "Sysmon64 zainstalowany i usluga zarejestrowana."
 }
 
-# ============================================================
-# KROK 7 - Weryfikacja ze usluga Sysmon64 dziala
-# ============================================================
 Write-Step "Weryfikacja stanu uslugi Sysmon64..."
-$sysmonSvc = Get-Service -Name $SYSMON_SVC -ErrorAction SilentlyContinue
-if ($sysmonSvc.Status -ne 'Running') {
-    Write-Host "    Usluga nie dziala, uruchamiam..."
-    Start-Service -Name $SYSMON_SVC
-    Start-Sleep -Seconds 2
-    $sysmonSvc.Refresh()
-    if ($sysmonSvc.Status -ne 'Running') {
-        Write-Error "Usluga Sysmon64 nie uruchomila sie. Status: $($sysmonSvc.Status)"
-        exit 1
-    }
-    Write-Done "Usluga Sysmon64 uruchomiona."
-} else {
-    Write-Skip "Usluga Sysmon64 juz dziala (Status: $($sysmonSvc.Status))."
-}
+Start-ServiceIfNeeded -Name $SYSMON_SVC
 
-# ============================================================
-# KROK 8 - Dodanie wpisu Sysmon do ossec.conf (Wazuh)
-# ============================================================
 Write-Step "Sprawdzanie konfiguracji Wazuh (ossec.conf)..."
+$ossecChanged = Add-SysmonLocalfileToOssec -Path $OSSEC_CONF
 
-if (-not (Test-Path $OSSEC_CONF)) {
-    Write-Host "    UWAGA: Plik $OSSEC_CONF nie istnieje - czy Wazuh Agent jest zainstalowany?" -ForegroundColor Yellow
-    Write-Skip "Pomijam konfiguracje Wazuh."
-} else {
-    $confContent = Get-Content $OSSEC_CONF -Raw
-
-    if ($confContent -match 'Microsoft-Windows-Sysmon') {
-        Write-Skip "Wpis Sysmon/Operational juz istnieje w ossec.conf - brak zmian."
-    } else {
-        Write-Host "    Dodawanie wpisu Sysmon do ossec.conf..."
-
-        # Wstaw blok localfile przed zamykajacym </ossec_config>
-        $newContent = $confContent -replace '</ossec_config>', ($LOCALFILE_BLOCK + "`n</ossec_config>")
-        Set-Content $OSSEC_CONF -Value $newContent -Encoding UTF8
-        $ossecChanged = $true
-        Write-Done "Wpis Sysmon dodany do ossec.conf."
-    }
-}
-
-# ============================================================
-# KROK 9 - Restart WazuhSvc (tylko jesli zmieniono ossec.conf)
-# ============================================================
 Write-Step "Sprawdzanie czy wymagany restart Wazuh..."
-if (-not $ossecChanged) {
-    Write-Skip "ossec.conf nie byl modyfikowany - pomijam restart WazuhSvc."
-} else {
-    $wazuhSvc = Get-Service -Name $WAZUH_SVC -ErrorAction SilentlyContinue
-    if (-not $wazuhSvc) {
-        Write-Host "    UWAGA: Usluga WazuhSvc nie istnieje - pomijam restart." -ForegroundColor Yellow
-    } else {
-        Write-Host "    Restartowanie WazuhSvc aby wczytac nowy ossec.conf..."
-        Restart-Service -Name $WAZUH_SVC -Force
-        Start-Sleep -Seconds 3
-        $wazuhSvc.Refresh()
-        if ($wazuhSvc.Status -ne 'Running') {
-            Write-Error "WazuhSvc nie uruchomil sie po restarcie. Status: $($wazuhSvc.Status)"
-            exit 1
-        }
-        Write-Done "WazuhSvc zrestartowany pomyslnie (Status: $($wazuhSvc.Status))."
+Restart-WazuhIfNeeded -Changed $ossecChanged
+
+Write-Step "Sprzatanie pobranych plikow..."
+if (-not $KeepDownloads) {
+    if ($downloadedZip -and (Test-Path -LiteralPath $SYSMON_ZIP)) {
+        Remove-Item -LiteralPath $SYSMON_ZIP -Force
+        Write-Done "Pobrany Sysmon.zip usuniety."
     }
+    if (-not $downloadedZip -and -not $downloadedConfig) {
+        Write-Skip "Brak pobranych plikow do sprzatniecia."
+    }
+} else {
+    Write-Skip "KeepDownloads ustawiony - zostawiam pobrane pliki."
 }
 
-# ============================================================
-# Podsumowanie
-# ============================================================
 $finalSysmon = Get-Service -Name $SYSMON_SVC -ErrorAction SilentlyContinue
-$finalWazuh  = Get-Service -Name $WAZUH_SVC  -ErrorAction SilentlyContinue
+$finalWazuh = Get-Service -Name $WAZUH_SVC -ErrorAction SilentlyContinue
 
 Write-Host ""
 Write-Host "=======================================" -ForegroundColor Green
 Write-Host "  Sysmon zainstalowany i dziala!" -ForegroundColor Green
 Write-Host "  Sysmon64 : $($finalSysmon.Status)"
 if ($finalWazuh) {
-Write-Host "  WazuhSvc  : $($finalWazuh.Status)"
+    Write-Host "  WazuhSvc  : $($finalWazuh.Status)"
 }
-Write-Host "  Katalog   : $SYSMON_DIR"
-Write-Host "  Config    : SwiftOnSecurity sysmonconfig-export.xml"
+Write-Host "  Katalog   : $SysmonDir"
+Write-Host "  Config    : $SYSMON_CFG"
 Write-Host "  Eventy    : eventvwr -> Applications and Services Logs"
 Write-Host "              -> Microsoft -> Windows -> Sysmon -> Operational"
 Write-Host "=======================================" -ForegroundColor Green
