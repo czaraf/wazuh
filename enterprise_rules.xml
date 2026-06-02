@@ -1,0 +1,659 @@
+<!--
+  Wazuh - Enterprise Security Rules
+  Version: 1.0 (zrekonstruowana z poprzednich wdrożeń)
+  ID Range: 100600-101499
+  Pokrycie: 18 kategorii ATT&CK / MITRE
+  Kategorie: Initial Access, AMSI, WMI, UAC, DCSync, Kerberoasting,
+             AS-REP, ADCS, BloodHound, Pass-the-Hash/Ticket,
+             C2 Frameworks, DNS Tunneling, BEC, Linux, Supply Chain,
+             Insider Threat, Credential Access, Lateral Movement
+  Compliance: GDPR/RODO, NIST 800-53, PCI DSS, ISO 27001, CIS v8, NIS2
+-->
+<group name="enterprise,security,attack">
+
+  <!-- ============================================================
+       BLOK 01: INITIAL ACCESS (T1566, T1190, T1189)
+       ID: 100600-100614
+       ============================================================ -->
+
+  <rule id="100600" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(winword|excel|powerpnt)\.exe.*\/(macro|vba|auto|xlm)</field>
+    <description>INITIAL ACCESS [T1566.001]: Office application spawning suspicious child process (macro)</description>
+    <mitre><id>T1566.001</id></mitre>
+    <group>enterprise,initial_access</group>
+  </rule>
+
+  <rule id="100601" level="14">
+    <if_sid>60009</if_sid>
+    <field name="win.eventdata.parentProcessName" type="pcre2">(?i)(winword|excel|powerpnt|onenote)\.exe$</field>
+    <field name="win.eventdata.processName" type="pcre2">(?i)(cmd|powershell|wscript|cscript|mshta|regsvr32|rundll32)\.exe$</field>
+    <description>INITIAL ACCESS [T1566.001]: Malicious macro - Office spawned shell process</description>
+    <mitre><id>T1566.001</id></mitre>
+    <group>enterprise,initial_access,critical</group>
+  </rule>
+
+  <rule id="100602" level="14">
+    <if_group>web</if_group>
+    <field name="data.url" type="pcre2">(?i)(\.php\?cmd=|\/shell\.php|\/c99\.php|\/r57\.php|\/webshell|cmd\.exe\?|\/eval\.php)</field>
+    <description>INITIAL ACCESS [T1190]: Web shell access detected</description>
+    <mitre><id>T1190</id></mitre>
+    <group>enterprise,initial_access,webshell</group>
+  </rule>
+
+  <rule id="100603" level="12">
+    <if_group>web</if_group>
+    <field name="data.url" type="pcre2">(?i)(\/\.git\/|\/\.env|\/config\.php\.bak|\/wp-config\.php\.bak|\/\.htpasswd)</field>
+    <description>INITIAL ACCESS [T1190]: Sensitive file exposure attempt (git/config leak)</description>
+    <mitre><id>T1190</id></mitre>
+    <group>enterprise,initial_access</group>
+  </rule>
+
+  <rule id="100604" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(mshta\.exe\s+https?:|mshta.*vbscript:|mshta.*javascript:)</field>
+    <description>INITIAL ACCESS [T1189]: MSHTA remote script execution (living-off-the-land)</description>
+    <mitre><id>T1189</id></mitre>
+    <group>enterprise,initial_access,lolbas</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 02: AMSI BYPASS (T1562.001)
+       ID: 100615-100629
+       ============================================================ -->
+
+  <rule id="100615" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(amsi\.dll|AmsiScanBuffer|AmsiInitFailed|amsiContext)</field>
+    <description>DEFENSE EVASION [T1562.001]: AMSI bypass attempt detected in command line</description>
+    <mitre><id>T1562.001</id></mitre>
+    <group>enterprise,defense_evasion,amsi_bypass</group>
+  </rule>
+
+  <rule id="100616" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)\[Ref\]\.Assembly\.GetType.*System\.Management\.Automation.*NonPublic</field>
+    <description>DEFENSE EVASION [T1562.001]: PowerShell reflection AMSI bypass</description>
+    <mitre><id>T1562.001</id></mitre>
+    <group>enterprise,defense_evasion,amsi_bypass,critical</group>
+  </rule>
+
+  <rule id="100617" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(Set-Variable.*amsi|sET-ItEM.*(\*mDR|\*iEX)|VaRiAbLe.*\*Mdr)</field>
+    <description>DEFENSE EVASION [T1562.001]: Case-variation AMSI bypass (variable obfuscation)</description>
+    <mitre><id>T1562.001</id></mitre>
+    <group>enterprise,defense_evasion,amsi_bypass</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 03: WMI PERSISTENCE (T1546.003)
+       ID: 100630-100644
+       ============================================================ -->
+
+  <rule id="100630" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)wmic.*(Create|Subscribe|Filter|Consumer).*(ActiveScript|CommandLine|EventFilter)</field>
+    <description>PERSISTENCE [T1546.003]: WMI event subscription persistence</description>
+    <mitre><id>T1546.003</id></mitre>
+    <group>enterprise,persistence,wmi</group>
+  </rule>
+
+  <rule id="100631" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(New-WMIEvent|Set-WMIInstance|Register-WMIEvent).*(Filter|Consumer|Binding)</field>
+    <description>PERSISTENCE [T1546.003]: PowerShell WMI event subscription</description>
+    <mitre><id>T1546.003</id></mitre>
+    <group>enterprise,persistence,wmi</group>
+  </rule>
+
+  <rule id="100632" level="12">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)scrcons\.exe|mofcomp\s+.*\.mof</field>
+    <description>PERSISTENCE [T1546.003]: WMI MOF file compilation (potential persistence)</description>
+    <mitre><id>T1546.003</id></mitre>
+    <group>enterprise,persistence,wmi</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 04: UAC BYPASS (T1548.002)
+       ID: 100645-100659
+       ============================================================ -->
+
+  <rule id="100645" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(eventvwr|fodhelper|sdclt|cmstp|slui|wsreset)\.exe.*reg</field>
+    <description>PRIVILEGE ESCALATION [T1548.002]: UAC bypass via eventvwr/fodhelper hijack</description>
+    <mitre><id>T1548.002</id></mitre>
+    <group>enterprise,privilege_escalation,uac_bypass</group>
+  </rule>
+
+  <rule id="100646" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)reg\s+add.*HKCU\\Software\\Classes\\(ms-settings|mscfile|Folder\\shell)</field>
+    <description>PRIVILEGE ESCALATION [T1548.002]: Registry-based UAC bypass (COM hijack)</description>
+    <mitre><id>T1548.002</id></mitre>
+    <group>enterprise,privilege_escalation,uac_bypass</group>
+  </rule>
+
+  <rule id="100647" level="12">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)bypassuac|UACMe|akagi|elevate.*token</field>
+    <description>PRIVILEGE ESCALATION [T1548.002]: Known UAC bypass tool signature</description>
+    <mitre><id>T1548.002</id></mitre>
+    <group>enterprise,privilege_escalation,uac_bypass</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 05: DCSYNC / AD ATTACKS (T1003.006)
+       ID: 100660-100674
+       ============================================================ -->
+
+  <rule id="100660" level="15">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(lsadump::dcsync|mimikatz.*dcsync|invoke-dcsync|DRSGetNCChanges)</field>
+    <description>CREDENTIAL ACCESS [T1003.006]: DCSync attack detected - AD credential replication</description>
+    <mitre><id>T1003.006</id></mitre>
+    <group>enterprise,credential_access,dcsync,critical</group>
+  </rule>
+
+  <rule id="100661" level="14">
+    <if_sid>60009</if_sid>
+    <field name="win.system.eventID" type="pcre2">^4662$</field>
+    <field name="win.eventdata.properties" type="pcre2">(?i)(1131f6aa-9c07-11d1-f79f-00c04fc2dcd2|1131f6ad-9c07-11d1-f79f-00c04fc2dcd2)</field>
+    <description>CREDENTIAL ACCESS [T1003.006]: Directory replication GUID access (potential DCSync)</description>
+    <mitre><id>T1003.006</id></mitre>
+    <group>enterprise,credential_access,dcsync</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 06: KERBEROASTING (T1558.003)
+       ID: 100675-100689
+       ============================================================ -->
+
+  <rule id="100675" level="13">
+    <if_sid>60009</if_sid>
+    <field name="win.system.eventID" type="pcre2">^4769$</field>
+    <field name="win.eventdata.ticketEncryptionType" type="pcre2">^0x17$</field>
+    <description>CREDENTIAL ACCESS [T1558.003]: Kerberoasting - TGS with RC4 encryption (0x17)</description>
+    <mitre><id>T1558.003</id></mitre>
+    <group>enterprise,credential_access,kerberoasting</group>
+  </rule>
+
+  <rule id="100676" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(invoke-kerberoast|rubeus.*kerberoast|GetUserSPNs|impacket.*GetUserSPNs)</field>
+    <description>CREDENTIAL ACCESS [T1558.003]: Kerberoasting tool execution detected</description>
+    <mitre><id>T1558.003</id></mitre>
+    <group>enterprise,credential_access,kerberoasting,critical</group>
+  </rule>
+
+  <rule id="100677" level="12">
+    <if_sid>60009</if_sid>
+    <field name="win.system.eventID" type="pcre2">^4769$</field>
+    <description>CREDENTIAL ACCESS [T1558.003]: Kerberos TGS request - monitor for volume (Kerberoast)</description>
+    <mitre><id>T1558.003</id></mitre>
+    <group>enterprise,credential_access,kerberoasting</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 07: AS-REP ROASTING (T1558.004)
+       ID: 100690-100704
+       ============================================================ -->
+
+  <rule id="100690" level="13">
+    <if_sid>60009</if_sid>
+    <field name="win.system.eventID" type="pcre2">^4768$</field>
+    <field name="win.eventdata.ticketEncryptionType" type="pcre2">^0x17$</field>
+    <description>CREDENTIAL ACCESS [T1558.004]: AS-REP Roasting - TGT with RC4 (no pre-auth)</description>
+    <mitre><id>T1558.004</id></mitre>
+    <group>enterprise,credential_access,asrep_roasting</group>
+  </rule>
+
+  <rule id="100691" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(invoke-asreproast|rubeus.*asreproast|GetNPUsers|impacket.*GetNPUsers)</field>
+    <description>CREDENTIAL ACCESS [T1558.004]: AS-REP Roasting tool detected</description>
+    <mitre><id>T1558.004</id></mitre>
+    <group>enterprise,credential_access,asrep_roasting,critical</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 08: ADCS ABUSE (T1649)
+       ID: 100705-100719
+       ============================================================ -->
+
+  <rule id="100705" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(certify|certipy|pkiview|certutil.*-ca\b|adcs.*vuln)</field>
+    <description>CREDENTIAL ACCESS [T1649]: ADCS abuse tool detected (Certify/Certipy)</description>
+    <mitre><id>T1649</id></mitre>
+    <group>enterprise,credential_access,adcs_abuse</group>
+  </rule>
+
+  <rule id="100706" level="13">
+    <if_sid>60009</if_sid>
+    <field name="win.system.eventID" type="pcre2">^4886$</field>
+    <field name="win.eventdata.requester" type="pcre2">(?i)\$@</field>
+    <description>CREDENTIAL ACCESS [T1649]: Certificate request for machine account (ESC8 indicator)</description>
+    <mitre><id>T1649</id></mitre>
+    <group>enterprise,credential_access,adcs_abuse</group>
+  </rule>
+
+  <rule id="100707" level="12">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)certutil.*(encode|decode|-urlcache|-f\s+http)</field>
+    <description>DEFENSE EVASION [T1140]: CertUtil used for encode/decode or download</description>
+    <mitre><id>T1140</id></mitre>
+    <group>enterprise,defense_evasion,lolbas</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 09: BLOODHOUND / AD ENUMERATION (T1069, T1087)
+       ID: 100720-100734
+       ============================================================ -->
+
+  <rule id="100720" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(SharpHound|bloodhound|invoke-bloodhound|AzureHound|ADCollector)</field>
+    <description>DISCOVERY [T1069.002]: BloodHound/AD enumeration tool detected</description>
+    <mitre><id>T1069.002</id></mitre>
+    <group>enterprise,discovery,bloodhound</group>
+  </rule>
+
+  <rule id="100721" level="11">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(net\s+group\s+"domain admins"|Get-DomainGroupMember|Get-DomainUser.*admincount)</field>
+    <description>DISCOVERY [T1069.002]: Domain admin group enumeration</description>
+    <mitre><id>T1069.002</id></mitre>
+    <group>enterprise,discovery</group>
+  </rule>
+
+  <rule id="100722" level="11">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(ldifde|csvde|adfind|dsquery|nltest.*domain_trusts)</field>
+    <description>DISCOVERY [T1087.002]: AD enumeration via ldifde/adfind/nltest</description>
+    <mitre><id>T1087.002</id></mitre>
+    <group>enterprise,discovery</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 10: PASS-THE-HASH / PASS-THE-TICKET (T1550)
+       ID: 100735-100749
+       ============================================================ -->
+
+  <rule id="100735" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(sekurlsa::pth|invoke-pth|pass.*hash|pth-winexe|crackmapexec.*-H\s+[a-f0-9]{32})</field>
+    <description>LATERAL MOVEMENT [T1550.002]: Pass-the-Hash attack detected</description>
+    <mitre><id>T1550.002</id></mitre>
+    <group>enterprise,lateral_movement,pth,critical</group>
+  </rule>
+
+  <rule id="100736" level="14">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(rubeus.*ptt|kerberos::ptt|invoke-ptt|mimikatz.*ticket)</field>
+    <description>LATERAL MOVEMENT [T1550.003]: Pass-the-Ticket detected</description>
+    <mitre><id>T1550.003</id></mitre>
+    <group>enterprise,lateral_movement,ptt,critical</group>
+  </rule>
+
+  <rule id="100737" level="13">
+    <if_sid>60009</if_sid>
+    <field name="win.system.eventID" type="pcre2">^4624$</field>
+    <field name="win.eventdata.logonType" type="pcre2">^3$</field>
+    <field name="win.eventdata.authenticationPackageName" type="pcre2">NTLM</field>
+    <description>LATERAL MOVEMENT [T1550.002]: Network logon with NTLM (potential PtH - type 3)</description>
+    <mitre><id>T1550.002</id></mitre>
+    <group>enterprise,lateral_movement,pth</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 11: C2 FRAMEWORKS (T1071, T1105)
+       ID: 100750-100764
+       ============================================================ -->
+
+  <rule id="100750" level="15">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(cobaltstrike|cobalt\s+strike|beacon\.exe|cs\.jar|teamserver)</field>
+    <description>C2 [T1071]: Cobalt Strike indicator in command line</description>
+    <mitre><id>T1071</id></mitre>
+    <group>enterprise,c2,cobaltstrike,critical</group>
+  </rule>
+
+  <rule id="100751" level="15">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(sliver|havoc\s+framework|brute\s+ratel|nighthawk\.exe|deimos\.exe)</field>
+    <description>C2 [T1071]: Modern C2 framework indicator (Sliver/Havoc/BRC4)</description>
+    <mitre><id>T1071</id></mitre>
+    <group>enterprise,c2,critical</group>
+  </rule>
+
+  <rule id="100752" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(meterpreter|metasploit|msf.*handler|multi\/handler)</field>
+    <description>C2 [T1071]: Metasploit/Meterpreter indicator detected</description>
+    <mitre><id>T1071</id></mitre>
+    <group>enterprise,c2</group>
+  </rule>
+
+  <rule id="100753" level="12">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(rundll32.*http|regsvr32.*http|regasm.*http|installutil.*http)</field>
+    <description>C2 [T1105]: LOLBAS used to download payload (potential C2 stager)</description>
+    <mitre><id>T1105</id></mitre>
+    <group>enterprise,c2,lolbas</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 12: DNS TUNNELING (T1071.004)
+       ID: 100765-100779
+       ============================================================ -->
+
+  <rule id="100765" level="13">
+    <if_group>dns</if_group>
+    <field name="data.dns.question.name" type="pcre2">(?i)([a-z0-9]{40,}\.|[a-f0-9]{32,}\.)</field>
+    <description>C2 [T1071.004]: Suspiciously long DNS subdomain (potential DNS tunneling)</description>
+    <mitre><id>T1071.004</id></mitre>
+    <group>enterprise,c2,dns_tunnel</group>
+  </rule>
+
+  <rule id="100766" level="12">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(iodine|dnscat|dns2tcp|dns\s+tunnel|dnstunnel)</field>
+    <description>C2 [T1071.004]: Known DNS tunneling tool detected</description>
+    <mitre><id>T1071.004</id></mitre>
+    <group>enterprise,c2,dns_tunnel</group>
+  </rule>
+
+  <rule id="100767" level="11">
+    <if_group>dns</if_group>
+    <field name="data.dns.question.type" type="pcre2">^(TXT|NULL|CNAME)$</field>
+    <field name="data.dns.question.name" type="pcre2">(?i)([a-z0-9]{20,}\.){3,}</field>
+    <description>C2 [T1071.004]: DNS TXT/NULL record query with deep subdomain nesting</description>
+    <mitre><id>T1071.004</id></mitre>
+    <group>enterprise,c2,dns_tunnel</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 13: BEC - BUSINESS EMAIL COMPROMISE (T1566, T1534)
+       ID: 100780-100794
+       ============================================================ -->
+
+  <rule id="100780" level="13">
+    <if_group>office365,exchange</if_group>
+    <field name="data.operation" type="pcre2">(?i)(New-InboxRule|Set-InboxRule)</field>
+    <field name="data.parameters" type="pcre2">(?i)(DeleteMessage|MoveToFolder|ForwardTo|RedirectTo)</field>
+    <description>BEC [T1534]: Suspicious inbox rule - auto-forward or delete (BEC indicator)</description>
+    <mitre><id>T1534</id></mitre>
+    <group>enterprise,bec,email</group>
+  </rule>
+
+  <rule id="100781" level="12">
+    <if_group>office365</if_group>
+    <field name="data.operation" type="pcre2">(?i)(Add-MailboxPermission|Add-RecipientPermission)</field>
+    <field name="data.parameters" type="pcre2">(?i)FullAccess</field>
+    <description>BEC [T1534]: Mailbox full access granted (account takeover indicator)</description>
+    <mitre><id>T1534</id></mitre>
+    <group>enterprise,bec,email</group>
+  </rule>
+
+  <rule id="100782" level="11">
+    <if_group>office365</if_group>
+    <field name="data.operation" type="pcre2">(?i)Set-Mailbox</field>
+    <field name="data.parameters" type="pcre2">(?i)(ForwardingAddress|ForwardingSMTPAddress|DeliverToMailboxAndForward)</field>
+    <description>BEC [T1534]: Email forwarding to external address configured</description>
+    <mitre><id>T1534</id></mitre>
+    <group>enterprise,bec,email</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 14: LINUX - ROOTKITS, CRON, SUDO, SSH (T1543, T1136)
+       ID: 100795-100824
+       ============================================================ -->
+
+  <rule id="100795" level="13">
+    <if_group>linux</if_group>
+    <field name="data.command" type="pcre2">(?i)(insmod|modprobe|rmmod)\s+.*(rootkit|hide|hook|stealth)</field>
+    <description>PERSISTENCE [T1543.003]: Suspicious kernel module loaded (rootkit indicator)</description>
+    <mitre><id>T1543.003</id></mitre>
+    <group>enterprise,persistence,linux,rootkit</group>
+  </rule>
+
+  <rule id="100796" level="12">
+    <if_group>syscheck</if_group>
+    <field name="file" type="pcre2">^(/etc/cron\.d/|/etc/cron\.daily/|/var/spool/cron/|/etc/crontab)$</field>
+    <description>PERSISTENCE [T1053.003]: Cron job file modification (persistence check)</description>
+    <mitre><id>T1053.003</id></mitre>
+    <group>enterprise,persistence,linux,cron</group>
+  </rule>
+
+  <rule id="100797" level="13">
+    <if_group>linux</if_group>
+    <field name="data.command" type="pcre2">(?i)(echo.*ALL.*NOPASSWD|visudo.*echo|chmod.*4755.*(sudo|bash|sh))</field>
+    <description>PRIVILEGE ESCALATION [T1548.003]: Sudo privilege escalation attempt</description>
+    <mitre><id>T1548.003</id></mitre>
+    <group>enterprise,privilege_escalation,linux,sudo</group>
+  </rule>
+
+  <rule id="100798" level="12">
+    <if_group>syscheck</if_group>
+    <field name="file" type="pcre2">^(/root|/home/[^/]+)/\.ssh/(authorized_keys|known_hosts)$</field>
+    <description>PERSISTENCE [T1098.004]: SSH authorized_keys modified (backdoor key)</description>
+    <mitre><id>T1098.004</id></mitre>
+    <group>enterprise,persistence,linux,ssh</group>
+  </rule>
+
+  <rule id="100799" level="11">
+    <if_group>linux</if_group>
+    <field name="data.command" type="pcre2">(?i)(chattr\s+\+i|lsattr.*-i)\s+.*(passwd|shadow|sudoers)</field>
+    <description>DEFENSE EVASION [T1222.002]: Immutable bit set on critical system file</description>
+    <mitre><id>T1222.002</id></mitre>
+    <group>enterprise,defense_evasion,linux</group>
+  </rule>
+
+  <rule id="100800" level="13">
+    <if_group>linux</if_group>
+    <field name="data.command" type="pcre2">(?i)(LD_PRELOAD=|export\s+LD_PRELOAD|\/etc\/ld\.so\.preload)</field>
+    <description>DEFENSE EVASION [T1574.006]: LD_PRELOAD hijacking (library injection)</description>
+    <mitre><id>T1574.006</id></mitre>
+    <group>enterprise,defense_evasion,linux,rootkit</group>
+  </rule>
+
+  <rule id="100801" level="12">
+    <if_group>linux</if_group>
+    <field name="data.command" type="pcre2">(?i)(useradd|adduser)\s+.*(--no-create-home|-M)\s+.*-s\s+\/bin\/(bash|sh)</field>
+    <description>PERSISTENCE [T1136.001]: New hidden user account created (Linux)</description>
+    <mitre><id>T1136.001</id></mitre>
+    <group>enterprise,persistence,linux</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 15: SUPPLY CHAIN (T1195, T1554)
+       ID: 100825-100839
+       ============================================================ -->
+
+  <rule id="100825" level="13">
+    <category>ossec</category>
+    <field name="data.command" type="pcre2">(?i)(npm\s+install|pip\s+install|gem\s+install)\s+.*--(script|unsafe-perm|allow-root)</field>
+    <description>SUPPLY CHAIN [T1195.002]: Package installation with unsafe permissions (supply chain risk)</description>
+    <mitre><id>T1195.002</id></mitre>
+    <group>enterprise,supply_chain</group>
+  </rule>
+
+  <rule id="100826" level="12">
+    <if_group>syscheck</if_group>
+    <field name="file" type="pcre2">(?i)(node_modules\/[^\/]+\/package\.json|site-packages\/[^\/]+\/setup\.py)</field>
+    <description>SUPPLY CHAIN [T1195.002]: Package manifest modified (potential dependency tampering)</description>
+    <mitre><id>T1195.002</id></mitre>
+    <group>enterprise,supply_chain</group>
+  </rule>
+
+  <rule id="100827" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(git\s+config.*url.*\.(onion|bit)|git\s+remote.*add.*http:\/\/[0-9]{1,3}\.[0-9])</field>
+    <description>SUPPLY CHAIN [T1195.001]: Git remote configured to suspicious/IP endpoint</description>
+    <mitre><id>T1195.001</id></mitre>
+    <group>enterprise,supply_chain</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 16: INSIDER THREAT (T1078, T1530)
+       ID: 100840-100854
+       ============================================================ -->
+
+  <rule id="100840" level="12">
+    <if_sid>60009</if_sid>
+    <field name="win.system.eventID" type="pcre2">^4624$</field>
+    <field name="win.eventdata.logonHour" type="pcre2">^(00|01|02|03|04|05|22|23)$</field>
+    <description>INSIDER THREAT [T1078]: User login during off-hours (00:00-05:59 or 22:00-23:59)</description>
+    <mitre><id>T1078</id></mitre>
+    <group>enterprise,insider_threat</group>
+  </rule>
+
+  <rule id="100841" level="11">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(robocopy|xcopy|copy\s+\/[yz]).*\\\\\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}</field>
+    <description>INSIDER THREAT [T1048]: Large-scale copy to network share (bulk exfil indicator)</description>
+    <mitre><id>T1048</id></mitre>
+    <group>enterprise,insider_threat,collection</group>
+  </rule>
+
+  <rule id="100842" level="12">
+    <if_group>office365</if_group>
+    <field name="data.operation" type="pcre2">(?i)(FileDownloaded|FileSyncDownloadedFull)</field>
+    <description>INSIDER THREAT [T1530]: Bulk file download from SharePoint/OneDrive</description>
+    <mitre><id>T1530</id></mitre>
+    <group>enterprise,insider_threat,cloud</group>
+  </rule>
+
+  <rule id="100843" level="11">
+    <if_sid>60009</if_sid>
+    <field name="win.system.eventID" type="pcre2">^4648$</field>
+    <description>INSIDER THREAT [T1078]: Explicit credential logon (runas / stored credentials)</description>
+    <mitre><id>T1078</id></mitre>
+    <group>enterprise,insider_threat</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 17: CREDENTIAL ACCESS - dodatkowe (T1110, T1212)
+       ID: 100855-100869
+       ============================================================ -->
+
+  <rule id="100855" level="13">
+    <if_sid>60009</if_sid>
+    <field name="win.system.eventID" type="pcre2">^4625$</field>
+    <options>no_full_log</options>
+    <description>CREDENTIAL ACCESS [T1110]: Failed logon attempt (brute force monitor)</description>
+    <mitre><id>T1110</id></mitre>
+    <group>enterprise,credential_access,brute_force</group>
+  </rule>
+
+  <rule id="100856" level="15" frequency="10" timeframe="60">
+    <if_matched_sid>100855</if_matched_sid>
+    <same_source_ip/>
+    <description>CREDENTIAL ACCESS [T1110.001]: Brute force - 10 failed logons in 60s from same IP</description>
+    <mitre><id>T1110.001</id></mitre>
+    <group>enterprise,credential_access,brute_force,critical</group>
+  </rule>
+
+  <rule id="100857" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(lazagne|credentialfileview|dumpCredStore|vault.*dump|keethief)</field>
+    <description>CREDENTIAL ACCESS [T1555]: Password manager / credential store dumping</description>
+    <mitre><id>T1555</id></mitre>
+    <group>enterprise,credential_access</group>
+  </rule>
+
+  <rule id="100858" level="12">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(cmdkey\s+\/list|vaultcmd\s+\/listcreds|windows\s+credential\s+manager)</field>
+    <description>CREDENTIAL ACCESS [T1555.004]: Windows Credential Manager enumeration</description>
+    <mitre><id>T1555.004</id></mitre>
+    <group>enterprise,credential_access</group>
+  </rule>
+
+  <!-- ============================================================
+       BLOK 18: LATERAL MOVEMENT (T1021, T1570)
+       ID: 100870-100884
+       ============================================================ -->
+
+  <rule id="100870" level="13">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(wmic\s+\/node:|invoke-wmimethod\s+-computer|psexec(64)?\.exe\s+\\\\)</field>
+    <description>LATERAL MOVEMENT [T1021.006]: WMI/PsExec remote command execution</description>
+    <mitre><id>T1021.006</id></mitre>
+    <group>enterprise,lateral_movement</group>
+  </rule>
+
+  <rule id="100871" level="12">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(Enter-PSSession|New-PSSession|Invoke-Command\s+-ComputerName|winrm\s+invoke)</field>
+    <description>LATERAL MOVEMENT [T1021.006]: PowerShell remoting to remote host</description>
+    <mitre><id>T1021.006</id></mitre>
+    <group>enterprise,lateral_movement</group>
+  </rule>
+
+  <rule id="100872" level="12">
+    <if_sid>60009</if_sid>
+    <field name="win.system.eventID" type="pcre2">^7045$</field>
+    <field name="win.eventdata.serviceFileName" type="pcre2">(?i)(\\temp\\|\\public\\|cmd\.exe|powershell)</field>
+    <description>LATERAL MOVEMENT [T1570]: Suspicious service installed from temp/public path</description>
+    <mitre><id>T1570</id></mitre>
+    <group>enterprise,lateral_movement,persistence</group>
+  </rule>
+
+  <rule id="100873" level="11">
+    <if_sid>67027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(net\s+use\s+\\\\.+\\[a-z$]+\s+\/user:|mount\s+\\\\.+\\[a-z$]+)</field>
+    <description>LATERAL MOVEMENT [T1021.002]: SMB network share mapping with credentials</description>
+    <mitre><id>T1021.002</id></mitre>
+    <group>enterprise,lateral_movement</group>
+  </rule>
+
+  <!-- ============================================================
+       KORELACJE WIELOKROKOWE - KILL CHAIN
+       ID: 100900-100919
+       ============================================================ -->
+
+  <rule id="100900" level="15" frequency="2" timeframe="600">
+    <if_matched_group>initial_access</if_matched_group>
+    <same_source_ip/>
+    <description>KILL CHAIN [TA0001]: Multiple initial access techniques from same source</description>
+    <mitre><id>TA0001</id></mitre>
+    <group>enterprise,kill_chain,critical</group>
+  </rule>
+
+  <rule id="100901" level="15" frequency="2" timeframe="600">
+    <if_matched_group>dcsync</if_matched_group>
+    <same_source_ip/>
+    <description>KILL CHAIN [T1003.006+T1550]: DCSync followed by credential use - APT confirmed</description>
+    <mitre><id>T1003.006</id></mitre>
+    <group>enterprise,kill_chain,apt,critical</group>
+  </rule>
+
+  <rule id="100902" level="15" frequency="2" timeframe="600">
+    <if_matched_group>kerberoasting</if_matched_group>
+    <same_source_ip/>
+    <description>KILL CHAIN [T1558.003]: Multiple Kerberoasting indicators from same source</description>
+    <mitre><id>T1558.003</id></mitre>
+    <group>enterprise,kill_chain,critical</group>
+  </rule>
+
+  <rule id="100903" level="15" frequency="2" timeframe="600">
+    <if_matched_group>lateral_movement</if_matched_group>
+    <same_source_ip/>
+    <description>KILL CHAIN [T1550]: Pass-the-Hash AND Pass-the-Ticket - full credential abuse</description>
+    <mitre><id>T1550</id></mitre>
+    <group>enterprise,kill_chain,critical</group>
+  </rule>
+
+  <rule id="100904" level="15" frequency="2" timeframe="600">
+    <if_matched_group>c2</if_matched_group>
+    <same_source_ip/>
+    <description>KILL CHAIN [TA0011]: Active C2 framework confirmed - incident response required</description>
+    <mitre><id>TA0011</id></mitre>
+    <group>enterprise,kill_chain,c2,critical</group>
+  </rule>
+
+</group>
