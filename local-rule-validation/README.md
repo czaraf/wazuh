@@ -21,7 +21,7 @@ Wygeneruj manifest i wrappery po zmianie XML-a:
 
 ```powershell
 cd C:\Users\rfk\Documents\Reguły Wazuh\wazuh\local-rule-validation
-.\New-LocalRuleValidationSuite.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\New-LocalRuleValidationSuite.ps1
 ```
 
 ## Uruchomienie na endpoincie
@@ -30,13 +30,13 @@ Wszystkie reguły po kolei:
 
 ```powershell
 cd C:\Users\rfk\Documents\Reguły Wazuh\wazuh\local-rule-validation\endpoint
-.\Invoke-AllLocalRuleTests.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Invoke-AllLocalRuleTests.ps1
 ```
 
 Pojedyncza reguła:
 
 ```powershell
-.\rules\Invoke-Rule100750.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\rules\Invoke-Rule100750.ps1
 ```
 
 Wyniki endpointu trafią do:
